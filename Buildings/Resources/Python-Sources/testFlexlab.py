@@ -21,7 +21,7 @@ import sys
 import os
 
 # Note: This hostname might changed in the future
-HOSTNAME = "128.3.20.130"
+HOSTNAME = "128.3.22.128"
 
 # Note: This port might change in the future
 #PORT = 3500
@@ -47,6 +47,8 @@ jsonWri = []
 # list that contains json for strings read
 jsonRea = []
 
+sshCli = []
+
 #===============================================================================
 # connect(self, hostname, port=22, username=None, password=None, pkey=None, key_filename=None, 
 # timeout=None, allow_agent=True, look_for_keys=True, compress=False)
@@ -62,7 +64,7 @@ jsonRea = []
 # 
 #    The pkey or key_filename passed in (if any)
 #    Any key we can find through an SSH agent
-#    Any "id_rsa" or "id_dsa" key discoverable in ~/.ssh/
+#    Any "id_rsa" or "id_dsa" key discoverable in ~/.sshCli/
 #    Plain username/password auth, if a password was given
 # 
 # If a private key requires a password to unlock it, and a password is passed in, 
@@ -70,9 +72,9 @@ jsonRea = []
 
 #===============================================================================
 # Example of script that gets private keyfile 
-# privatekeyfile = os.path.expanduser('~/.ssh/id_rsa')
+# privatekeyfile = os.path.expanduser('~/.sshCli/id_rsa')
 # mykey = paramiko.RSAKey.from_private_key_file(privatekeyfile)
-# ssh.connect(IP[0], username = user[0], pkey = mykey)
+# sshCli.connect(IP[0], username = user[0], pkey = mykey)
 #===============================================================================
 
 #===============================================================================
@@ -84,17 +86,18 @@ def connect (usr, pwd):
     :param pwd: Password.
 
     '''
+    global sshCli
     try:
         import paramiko
     except ImportError:
         raise ImportError('Module ``paramiko`` is required!')
-    ssh = paramiko.SSHClient()
-    ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+    sshCli = paramiko.SSHClient()
+    sshCli.set_missing_host_key_policy(paramiko.AutoAddPolicy())
     
     # Check if a non-empty password has been provided.
     if(pwd != ""):
         try:
-            ssh.connect(HOSTNAME, username=usr, password=pwd)
+            sshCli.connect(HOSTNAME, username=usr, password=pwd)
         except IOError, e:
             raise IOError(str(e) + ". Connection cannot be established with" 
                             + " username: " + usr + " and"
@@ -102,7 +105,7 @@ def connect (usr, pwd):
     # Try to connect without password
     else:
         try:
-            ssh.connect(HOSTNAME, username=usr
+            sshCli.connect(HOSTNAME, username=usr
                     , pkey='<key-file>')
         except IOError, e:
             raise IOError(str(e) + ". Connection cannot be established with"
@@ -125,10 +128,17 @@ def get(usr, pwd, sys_chan):
     
     # Send command to server 
     try:
-        stdin, stdout, stderr = ssh.exec_command(cmd)
-        ssh.close()
-        return stdout
-    except paramiko.SSHException, e :
+        stdin, stdout, stderr = sshCli.exec_command(cmd)
+        sshCli.close()
+        if (len(stderr.read())!=0):
+           raise IOError(" An error occurs when trying to get data for "
+                         + sys_chan 
+                         + ". The error message returns is: "
+                         # FIXME: Check the string returned.
+                         + str(stderr)
+                         +"!") 
+        return stdout.read()
+    except IOError, e :
         raise IOError(str(e) + ". Command: " + cmd + " cannot be executed!")
 
  
@@ -150,10 +160,16 @@ def set(usr, pwd, sys_chan, sys_chan_val):
     
     # Send command to server 
     try:
-        stdin, stdout, stderr = ssh.exec_command(cmd)
-        ssh.close()
-        return stdout
-    except paramiko.SSHException, e :
+        stdin, stdout, stderr = sshCli.exec_command(cmd)
+        sshCli.close()
+        if (len(stderr.read())!=0):
+           raise IOError(" An error occurs when trying to set data for "
+                         + sys_chan 
+                         + ". The error message returns is: "
+                          # FIXME: Check the string returned.
+                         + str(stderr) 
+                         +"!") 
+    except IOError, e :
         raise IOError(str(e) + ". Command: " + cmd + " cannot be executed!")
 
 def getlen(u):
@@ -276,7 +292,7 @@ def flexlab(dblWri, strWri, strRea):
             
      # Get doubles values from strings to be read
     for i in range(0, lenStrRea):
-        jsonRea.append (set (usrName, usrPwd, strRea[i]))       
+        jsonRea.append (get (usrName, usrPwd, strRea[i]))       
     
     return 2
 
