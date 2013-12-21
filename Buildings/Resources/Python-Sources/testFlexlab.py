@@ -218,10 +218,10 @@ def init(dblWri, strWri, strRea):
                 tmpUsrName = usrProp[1]
                 tmpUsrPwd  = usrProp[3]
             else:
-                raise Exception ("Configuration file in " 
-                                 + cfg_file + " does not contain a " 
-                                 + " valid user and a valid password."
-                                 + " Please check the configuration file!")
+                raise IOError ("Configuration file in " 
+                                + cfg_file + " does not contain a " 
+                                + " valid user and a valid password."
+                                + " Please check the configuration file!")
 
     # Determine the username
     if (strWri[0].lower() != "user"):
