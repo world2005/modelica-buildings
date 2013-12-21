@@ -1,6 +1,6 @@
 # Python module functions used to interface with the CalBay adapter from Modelica.
 # Make sure that the python path is set, such as by running
-# @author: Thierry Nouidui, 
+# @author: Thierry Nouidui  2013-12-20
 
 #===============================================================================
 # This script requires paramiko, pycrypto and ecdsa to be installed.
@@ -76,7 +76,6 @@ jsonRea = []
 #===============================================================================
 
 #===============================================================================
-
 
 def connect (usr, pwd):
     '''Establish an SSH connection using username and password.
