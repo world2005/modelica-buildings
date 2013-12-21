@@ -15,14 +15,14 @@ function exchange "Function that communicates with Python"
   input Integer nIntRea(min=0) "Number of integer values to read";
 
   input Integer nStrWri(min=0) "Number of strings to write";
-//  input Integer nStrRea(min=0) "Number of strings to read";
-//  input Integer strLenRea(min=0)
-//    "Maximum length of each string that is read. If exceeded, the simulation stops with an error";
+//   input Integer nStrRea(min=0) "Number of strings to read";
+//   input Integer strLenRea(min=0)
+//     "Maximum length of each string that is read. If exceeded, the simulation stops with an error";
 
   output Real    dblRea[max(1, nDblRea)] "Double values returned by Python";
   output Integer intRea[max(1, nIntRea)] "Integer values returned by Python";
 
-  external "C" pythonExchangeValues(moduleName, functionName,
+  external "C" pythonExchangeValuesFlexlab(moduleName, functionName,
                                     dblWri, nDblWri,
                                     dblRea, nDblRea,
                                     intWri, nIntWri,
