@@ -42,12 +42,24 @@ usrName = ""
 usrPwd = ""
 
 # list that contains json for strings written
-jsonWri = []
+jsonStrWri = []
 
 # list that contains json for strings read
-jsonRea = []
+jsonStrRea = []
 
 sshCli = []
+
+#===============================================================================
+# Json string generated from http://www.jsoneditoronline.org/
+#===============================================================================
+testJson = {
+    "sensname": "WattStopper.HS1--4126F--Dimmer Level-2",
+    "sensvalue":10,
+    "logger": {
+        "msg": "Success!",
+        "level":"WARNING"
+    }
+}
 
 #===============================================================================
 # connect(self, hostname, port=22, username=None, password=None, pkey=None, key_filename=None, 
@@ -78,6 +90,78 @@ sshCli = []
 #===============================================================================
 
 #===============================================================================
+
+
+
+#===============================================================================
+# Use standard python logging levels to specify logger
+# LEVELS = {'debug': logging.DEBUG,
+#          'info': logging.INFO,
+#          'warning': logging.WARNING,
+#          'error': logging.ERROR,
+#          'critical': logging.CRITICAL}
+#===============================================================================
+
+def jsonValidator(str):
+    '''Validates the JSON retrieved from SSH.
+
+    :param str: String.
+
+    '''
+    try:
+         from jsonschema import validate
+    except ImportError:
+        raise ImportError('Module ``jsonschema`` is required!')
+   
+    # Json Schema
+    schema = {
+        "type": "object",
+        "properties": {
+        "sensname":{"type":"string"},
+        "sensvalue": {"type":"number"},
+        "logger": {
+            "msg": {"type":"string"},
+            "level": {"type":"string"}
+        }
+      }
+    }
+    # If no exception is raised by validate(), the instance is valid.
+    validate(str, schema)
+
+
+def jsonPaser(str):
+    '''Parse the JSON retrieved from SSH.
+
+    :param str: String.
+    :return: Vectors with value, msg and level
+
+    '''
+
+    import json 
+       
+    # Load json 
+    json_data = json.loads(str)
+    
+    #Validate json
+    jsonValidator(json_data)
+    
+    #Retrieves properties of data strings
+    
+    # Get the sensorname
+    sensName=json_data["sensname"]
+    
+    # Get the sensValue
+    # Put a dummy number to indicate write
+    sensValue=json_data["sensvalue"]
+    
+    #Get the logger message
+    logMsg = json_data["logger"]["msg"]
+    
+    #Get the logger level
+    logLevel== json_data["logger"]["level"]
+    
+    #return properties
+    return (sensName, sensValue, logMsg, logLevel)
 
 def connect (usr, pwd):
     '''Establish an SSH connection using username and password.
@@ -275,8 +359,10 @@ def flexlab(dblWri, strWri, strRea):
 
     '''    
     # Redefine global variables
-    global jsonRea
-    global jsonWri
+    global jsonStrRea
+    global jsonStrWri
+    nameLstRea = []
+    nameLstWri = []
     
     # Initialize the simulation
     init (dblWri, strWri, strRea)
@@ -285,14 +371,17 @@ def flexlab(dblWri, strWri, strRea):
     # Note: Need to substract 2 from the length of strWri
     # for the username and the passords strings
     if (lenDblWri == 1):
-        jsonWri.append (set (usrName, usrPwd, strWri[2], dblWri))
+        name, value, msg, level = jsonParser(set (usrName, usrPwd, strWri[2], dblWri))
+        nameLst.append(name)
+        
+        
     else:
         for i in range(0, lenStrWri - 2):
-            jsonWri.append (set (usrName, usrPwd, strWri[i + 2], dblWri[i]))
+            jsonStrWri.append (set (usrName, usrPwd, strWri[i + 2], dblWri[i]))
             
      # Get doubles values from strings to be read
     for i in range(0, lenStrRea):
-        jsonRea.append (get (usrName, usrPwd, strRea[i]))       
+        jsonStrRea.append (get (usrName, usrPwd, strRea[i]))       
     
     return 2
 
