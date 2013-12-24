@@ -21,7 +21,7 @@ import sys
 import os
 
 # Note: This hostname might changed in the future
-HOSTNAME = "128.3.22.128"
+HOSTNAME = "128.3.20.130"
 
 # Note: This port might change in the future
 #PORT = 3500
