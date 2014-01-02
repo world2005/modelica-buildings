@@ -1,5 +1,4 @@
 # Python module functions used to interface with the CalBay adapter from Modelica.
-# Make sure that the python path is set, such as by running
 # @author: Thierry Nouidui  2013-12-20
 
 #===============================================================================
@@ -13,7 +12,7 @@
 #     https://pypi.python.org/pypi/ecdsa/
 # Step 2: Download the zip files, and extract them
 # 
-# Step 3: Move into the differentfolder and run python setup.py install
+# Step 3: Move into the different folders and run python setup.py install
 # 
 #===============================================================================
 
@@ -22,42 +21,44 @@ import os
 
 # Note: This hostname might changed in the future
 HOSTNAME = "128.3.20.130"
+# FOR TESTING
+#HOSTNAME = "128.3.22.128"
 
-# Note: This port might change in the future
-#PORT = 3500
+# Note: This port might not be needed if SSH is used
+PORT = 3500
 
 # Configuration file
 CFG_FILE = ".flexlab.cfg"
 
 # Global variables
-# length of double to write
+# Length of double to write
 lenDlbWri = 0
-#length of strings to write
+# Length of strings to write
 lenStrWri = 0
-# length of strings to read
+# Length of strings to read
 lenStrRea = 0
 # username
 usrName = ""
 # user password
 usrPwd = ""
 
-# list that contains json for strings written
+# List that contains json for strings written
 jsonStrWri = []
-
-# list that contains json for strings read
+# List that contains json for strings read
 jsonStrRea = []
-
+# Return value of SSH
 sshCli = []
 
 #===============================================================================
 # Json string generated from http://www.jsoneditoronline.org/
 #===============================================================================
+# FOR TESTING
 testJson = {
     "sensname": "WattStopper.HS1--4126F--Dimmer Level-2",
     "sensvalue":10,
     "logger": {
         "msg": "Success!",
-        "level":"WARNING"
+        "level":"INFO"
     }
 }
 
@@ -91,17 +92,6 @@ testJson = {
 
 #===============================================================================
 
-
-
-#===============================================================================
-# Use standard python logging levels to specify logger
-# LEVELS = {'debug': logging.DEBUG,
-#          'info': logging.INFO,
-#          'warning': logging.WARNING,
-#          'error': logging.ERROR,
-#          'critical': logging.CRITICAL}
-#===============================================================================
-
 def jsonValidator(str):
     '''Validates the JSON retrieved from SSH.
 
@@ -127,41 +117,6 @@ def jsonValidator(str):
     }
     # If no exception is raised by validate(), the instance is valid.
     validate(str, schema)
-
-
-def jsonPaser(str):
-    '''Parse the JSON retrieved from SSH.
-
-    :param str: String.
-    :return: Vectors with value, msg and level
-
-    '''
-
-    import json 
-       
-    # Load json 
-    json_data = json.loads(str)
-    
-    #Validate json
-    jsonValidator(json_data)
-    
-    #Retrieves properties of data strings
-    
-    # Get the sensorname
-    sensName=json_data["sensname"]
-    
-    # Get the sensValue
-    # Put a dummy number to indicate write
-    sensValue=json_data["sensvalue"]
-    
-    #Get the logger message
-    logMsg = json_data["logger"]["msg"]
-    
-    #Get the logger level
-    logLevel== json_data["logger"]["level"]
-    
-    #return properties
-    return (sensName, sensValue, logMsg, logLevel)
 
 def connect (usr, pwd):
     '''Establish an SSH connection using username and password.
@@ -209,6 +164,8 @@ def get(usr, pwd, sys_chan):
     
     # Write command to execute
     cmd = 'GETDAQ:' + sys_chan
+    # FOR TESTING
+    #cmd = 'echo test >> file2.txt'
     
     # Send command to server 
     try:
@@ -222,6 +179,8 @@ def get(usr, pwd, sys_chan):
                          + str(stderr)
                          +"!") 
         return stdout.read()
+        # FOR TESTING
+        # return testJson
     except IOError, e :
         raise IOError(str(e) + ". Command: " + cmd + " cannot be executed!")
 
@@ -241,6 +200,8 @@ def set(usr, pwd, sys_chan, sys_chan_val):
     
     # Write command to execute
     cmd = 'SETDAQ:' + sys_chan + ':' + str(sys_chan_val)
+    # FOR TESTING
+    #cmd = 'echo test >> file1.txt'
     
     # Send command to server 
     try:
@@ -253,8 +214,34 @@ def set(usr, pwd, sys_chan, sys_chan_val):
                           # FIXME: Check the string returned.
                          + str(stderr) 
                          +"!") 
+        return stdout.read()
+        # FOR TESTING
+        #return testJson
     except IOError, e :
         raise IOError(str(e) + ". Command: " + cmd + " cannot be executed!")
+    
+def jsonParser(json_data):
+    '''Parse the JSON retrieved from SSH.
+
+    :param str: String.
+    :return: Vectors with value, msg and level
+
+    '''
+
+    #Validate json
+    jsonValidator(json_data)
+    #Retrieve properties of data strings
+    # Get the sensorname
+    sensName=json_data["sensname"]
+    # Get the sensValue
+    # Put a dummy number to indicate write
+    sensValue=json_data["sensvalue"]
+    #Get the logger message
+    logMsg = json_data["logger"]["msg"]
+    #Get the logger level
+    logLevel = json_data["logger"]["level"]
+    #return properties
+    return (sensName, sensValue, logMsg, logLevel)
 
 def getlen(u):
     '''Get length of scalar or vector.
@@ -267,6 +254,33 @@ def getlen(u):
         return len (u)
     else:
         return 1    
+
+
+#===============================================================================
+# Logging Levels in Python
+# 
+# Level     Numeric value
+# CRITICAL     50
+# ERROR        40
+# WARNING      30
+# INFO         20
+# DEBUG        10
+# NOTSET        0
+#===============================================================================
+def getlog(name, level, msg):
+    '''Get length of scalar or vector.
+
+    :param name: Name of string.
+    :param level: Logging level.
+    :param msg: Logging message.
+
+    '''  
+
+    if (level.lower() == "error"):
+        raise IOError ("ERROR: An error occurs when trying to retrieve data for " 
+                       + name + ". The logging message is: " + msg)
+#    if(level.lower() == "warning"):
+#        errmsg = "WARNING: An error occurs when trying to retrieve data for " + name + ". The logging message is: " + msg   
 
 def init(dblWri, strWri, strRea):
     '''Initialize variables for simulation.
@@ -313,12 +327,13 @@ def init(dblWri, strWri, strRea):
         for t in prop.split(";"):
             for u in t.split("="):
                 usrProp.append(u)
-            if ((''.join(usrProp[0].lower().split()) == "user") 
-                & (''.join(usrProp[2].lower().split()) == "password")):
+        if ((''.join(usrProp[0].lower().split()) == "user") 
+            & (''.join(usrProp[2].lower().split()) == "password")):
+                #sys.exit(usrProp[0]+usrProp[2] + usrProp[1] + usrProp[3])
                 tmpUsrName = usrProp[1]
-                tmpUsrPwd  = usrProp[3]
-            else:
-                raise IOError ("Configuration file in " 
+                tmpUsrPwd  = usrProp[3]  
+        else:
+            raise IOError ("Configuration file in " 
                                 + cfg_file + " does not contain a " 
                                 + " valid user and a valid password."
                                 + " Please check the configuration file!")
@@ -356,32 +371,60 @@ def flexlab(dblWri, strWri, strRea):
     :param dblWri: List of doubles to be written.
     :param strWri: List of strings to be written.
     :param strRea: List of strings to be read.
+    :return: Vectors or scalar values of strings read.
 
     '''    
     # Redefine global variables
     global jsonStrRea
     global jsonStrWri
-    nameLstRea = []
-    nameLstWri = []
+    
+    # List with values for strings written
+    resMatWri = [[], [], [], []]
+    # List with values for strings read
+    resMatRea = [[], [], [], []]
     
     # Initialize the simulation
     init (dblWri, strWri, strRea)
     
     # Set doubles and strings to be written
     # Note: Need to substract 2 from the length of strWri
-    # for the username and the passords strings
+    # for the username and the passwords strings
     if (lenDblWri == 1):
-        name, value, msg, level = jsonParser(set (usrName, usrPwd, strWri[2], dblWri))
-        nameLst.append(name)
-        
-        
+        name, value, msg, level = jsonParser(set(usrName, usrPwd, strWri[2], dblWri))
+        # Check logging
+        getlog(name, level, msg)
+        # Save data
+        resMatWri[0].append(name)
+        resMatWri[1].append(value)
+        resMatWri[2].append(msg)
+        resMatWri[3].append(level)
     else:
         for i in range(0, lenStrWri - 2):
-            jsonStrWri.append (set (usrName, usrPwd, strWri[i + 2], dblWri[i]))
+            name, value, msg, level =  jsonParser (set (usrName, usrPwd, strWri[i + 2], dblWri[i]))
+            # Check logging
+            getlog(name, level, msg)
+            # Save data
+            resMatWri[0].append(name)
+            resMatWri[1].append(value)
+            resMatWri[2].append(msg)
+            resMatWri[3].append(level)
             
      # Get doubles values from strings to be read
     for i in range(0, lenStrRea):
-        jsonStrRea.append (get (usrName, usrPwd, strRea[i]))       
-    
-    return 2
+        name, value, msg, level = jsonParser (get (usrName, usrPwd, strRea[i]))
+        # Check logging
+        getlog(name, level, msg)
+        # Save data
+        resMatRea[0].append(name)
+        resMatRea[1].append(value)
+        resMatRea[2].append(msg)
+        resMatRea[3].append(level)       
+    # Return scalar/vectors of values retrieved
+    if (lenStrRea == 1):
+        # Return scalar
+        return resMatRea[1][0]
+    else:
+        # Return vector if List
+         return resMatRea[1]
+        
 
