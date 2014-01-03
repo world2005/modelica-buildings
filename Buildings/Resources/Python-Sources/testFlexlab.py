@@ -166,7 +166,7 @@ def get(usr, pwd, sys_chan):
     
     # Write command to execute. On the server side testbed.py is called.
     # FIXME: make sure that script can be found on the server side.
-    cmd = testbed.py + 'GETDAQ:' + sys_chan
+    cmd = "testbed.py" + " " + 'GETDAQ:' + sys_chan
     #cmd = testbed.py + 'GETDAQ:' + sys_chan
     # FOR TESTING
     #cmd = 'echo test >> file2.txt'
@@ -204,7 +204,7 @@ def set(usr, pwd, sys_chan, sys_chan_val):
     
     # Write command to execute. On the server side testbed.py is called.
     # FIXME: make sure that script can be found on the server side.
-    cmd = testbed.py + 'SETDAQ:' + sys_chan + ':' + str(sys_chan_val)
+    cmd = "testbed.py" + " " + 'SETDAQ:' + sys_chan + ':' + str(sys_chan_val)
     # FOR TESTING
     #cmd = 'echo test >> file1.txt'
     
