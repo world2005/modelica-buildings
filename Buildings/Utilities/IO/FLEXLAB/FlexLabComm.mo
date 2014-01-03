@@ -60,11 +60,9 @@ end lightingController;
     samplePeriod=10,
     startTime=0,
     nStrWri=1,
-    usrName="user",
-    usrPwd="pwd",
-    strWri={"writer.txt"},
-    nStrRea=2,
-    strRea={"reader","baba"})
+    nStrRea=1,
+    strWri={"u1"},
+    strRea={"WattStopper.HS1--4126F--Dimmer Level-2"})
     annotation (Placement(transformation(extent={{46,-10},{66,10}})));
 equation
   connect(const.y, pyt.uR[1]) annotation (Line(

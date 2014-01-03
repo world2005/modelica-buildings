@@ -54,10 +54,11 @@ sshCli = []
 #===============================================================================
 # FOR TESTING
 testJson = {
-    "sensname": "WattStopper.HS1--4126F--Dimmer Level-2",
+    "systype":"WattStopper",
+    "sensname":"HS1--4126F--Dimmer Level-2",
     "sensvalue":10,
-    "logger": {
-        "msg": "Success!",
+    "logger":{
+        "msg":"Success!",
         "level":"INFO"
     }
 }
@@ -105,20 +106,21 @@ def jsonValidator(str):
    
     # Json Schema
     schema = {
-        "type": "object",
-        "properties": {
+        "type":"object",
+        "properties":{
+        "systype":{"type":"string"},
         "sensname":{"type":"string"},
-        "sensvalue": {"type":"number"},
-        "logger": {
-            "msg": {"type":"string"},
-            "level": {"type":"string"}
+        "sensvalue":{"type":"number"},
+        "logger":{
+            "msg":{"type":"string"},
+            "level":{"type":"string"}
         }
       }
     }
     # If no exception is raised by validate(), the instance is valid.
     validate(str, schema)
 
-def connect (usr, pwd):
+def connect(usr, pwd):
     '''Establish an SSH connection using username and password.
 
     :param usr: Username.
@@ -160,10 +162,12 @@ def get(usr, pwd, sys_chan):
 
     '''
     # Connect to server
-    connect (usr, pwd)
+    connect(usr, pwd)
     
-    # Write command to execute
-    cmd = 'GETDAQ:' + sys_chan
+    # Write command to execute. On the server side testbed.py is called.
+    # FIXME: make sure that script can be found on the server side.
+    cmd = testbed.py + 'GETDAQ:' + sys_chan
+    #cmd = testbed.py + 'GETDAQ:' + sys_chan
     # FOR TESTING
     #cmd = 'echo test >> file2.txt'
     
@@ -171,7 +175,7 @@ def get(usr, pwd, sys_chan):
     try:
         stdin, stdout, stderr = sshCli.exec_command(cmd)
         sshCli.close()
-        if (len(stderr.read())!=0):
+        if(len(stderr.read())!=0):
            raise IOError(" An error occurs when trying to get data for "
                          + sys_chan 
                          + ". The error message returns is: "
@@ -196,10 +200,11 @@ def set(usr, pwd, sys_chan, sys_chan_val):
 
     '''
     # Connect to server
-    connect (usr, pwd)
+    connect(usr, pwd)
     
-    # Write command to execute
-    cmd = 'SETDAQ:' + sys_chan + ':' + str(sys_chan_val)
+    # Write command to execute. On the server side testbed.py is called.
+    # FIXME: make sure that script can be found on the server side.
+    cmd = testbed.py + 'SETDAQ:' + sys_chan + ':' + str(sys_chan_val)
     # FOR TESTING
     #cmd = 'echo test >> file1.txt'
     
@@ -207,7 +212,7 @@ def set(usr, pwd, sys_chan, sys_chan_val):
     try:
         stdin, stdout, stderr = sshCli.exec_command(cmd)
         sshCli.close()
-        if (len(stderr.read())!=0):
+        if(len(stderr.read())!=0):
            raise IOError(" An error occurs when trying to set data for "
                          + sys_chan 
                          + ". The error message returns is: "
@@ -224,24 +229,28 @@ def jsonParser(json_data):
     '''Parse the JSON retrieved from SSH.
 
     :param str: String.
-    :return: Vectors with value, msg and level
+    :return: Vectors with name, value, msg and level
 
     '''
 
     #Validate json
     jsonValidator(json_data)
     #Retrieve properties of data strings
+    # Get the system type
+    sysType=json_data["systype"]
     # Get the sensorname
     sensName=json_data["sensname"]
+    # Concatenate sensorname and systype
+    sensTypeName = sysType + "." + sensName
     # Get the sensValue
-    # Put a dummy number to indicate write
+    # FIXME: Server should put dummy value in String when writing
     sensValue=json_data["sensvalue"]
     #Get the logger message
     logMsg = json_data["logger"]["msg"]
     #Get the logger level
     logLevel = json_data["logger"]["level"]
     #return properties
-    return (sensName, sensValue, logMsg, logLevel)
+    return(sensTypeName, sensValue, logMsg, logLevel)
 
 def getlen(u):
     '''Get length of scalar or vector.
@@ -250,8 +259,8 @@ def getlen(u):
     :return: Length.
 
     '''  
-    if (isinstance(u, list)):
-        return len (u)
+    if(isinstance(u, list)):
+        return len(u)
     else:
         return 1    
 
@@ -276,8 +285,8 @@ def getlog(name, level, msg):
 
     '''  
 
-    if (level.lower() == "error"):
-        raise IOError ("ERROR: An error occurs when trying to retrieve data for " 
+    if(level.lower() == "error"):
+        raise IOError("ERROR: An error occurs when trying to retrieve data for " 
                        + name + ". The logging message is: " + msg)
 #    if(level.lower() == "warning"):
 #        errmsg = "WARNING: An error occurs when trying to retrieve data for " + name + ". The logging message is: " + msg   
@@ -303,13 +312,14 @@ def init(dblWri, strWri, strRea):
     tmpUsrPwd = ""
     
     # Get length of inputs variables
-    lenDblWri = getlen (dblWri)
-    lenStrWri = getlen (strWri)
-    lenStrRea = getlen (strRea) 
+    lenDblWri = getlen(dblWri)
+    lenStrWri = getlen(strWri)
+    lenStrRea = getlen(strRea) 
         
     # Check if number of doubles to write match with number of strings to write
-    if (lenDblWri != lenStrWri - 2):
-        raise ValueError ("Number of doubles to write: " 
+    print lenStrWri
+    if(lenDblWri != lenStrWri - 2):
+        raise ValueError("Number of doubles to write: " 
                           + str(lenDblWri) + " is not equal to number " 
                           + " of strings to write: " + str(lenStrWri - 2) 
                           + ". Please check and correct!")   
@@ -318,7 +328,7 @@ def init(dblWri, strWri, strRea):
     from os.path import expanduser
     home = expanduser("~")
     cfg_file = os.path.join(home, CFG_FILE) 
-    if (os.path.exists(cfg_file)):
+    if(os.path.exists(cfg_file)):
         # Parse the file and retrieve user properties
         usrProp = []
         f = open(cfg_file, 'r')
@@ -327,19 +337,19 @@ def init(dblWri, strWri, strRea):
         for t in prop.split(";"):
             for u in t.split("="):
                 usrProp.append(u)
-        if ((''.join(usrProp[0].lower().split()) == "user") 
+        if((''.join(usrProp[0].lower().split()) == "user") 
             & (''.join(usrProp[2].lower().split()) == "password")):
                 #sys.exit(usrProp[0]+usrProp[2] + usrProp[1] + usrProp[3])
                 tmpUsrName = usrProp[1]
                 tmpUsrPwd  = usrProp[3]  
         else:
-            raise IOError ("Configuration file in " 
+            raise IOError("Configuration file in " 
                                 + cfg_file + " does not contain a " 
                                 + " valid user and a valid password."
                                 + " Please check the configuration file!")
 
     # Determine the username
-    if (strWri[0].lower() != "user"):
+    if(strWri[0].lower() != "user"):
         # Get username from strWri
         usrName = strWri[0]
     elif(os.path.exists(cfg_file)):
@@ -351,12 +361,12 @@ def init(dblWri, strWri, strRea):
         usrName = getpass.getuser()
             
     # Determine the password
-    if (strWri[1].lower() != ""):
+    if(strWri[1].lower() != ""):
         # Get the password from strWri
         usrPwd = strWri[1]
     elif(os.path.exists(cfg_file)):
         # Get password from configuration file
-        if (usrName == tmpUsrName):
+        if(usrName == tmpUsrName):
             usrPwd = tmpUsrPwd
         else:
             usrPwd = ""
@@ -372,6 +382,16 @@ def flexlab(dblWri, strWri, strRea):
     :param strWri: List of strings to be written.
     :param strRea: List of strings to be read.
     :return: Vectors or scalar values of strings read.
+    
+    Usage: Type
+           >>> import testFlexlab
+           >>>testFlexlab.flexlab([1,2], ["usr", "pwd", "u1", "u2"], ["y1", "y2"])
+
+    This will return the following exception which is to expect since the credentials are incorrect.
+        ``IOError: [Errno 10060] A connection attempt failed because the connected party 
+        did not properly respond after a period of time, or established connection failed
+        because connected host has failed to respond. Connection cannot be established
+        with username: usr and password: pwd!``
 
     '''    
     # Redefine global variables
@@ -383,35 +403,45 @@ def flexlab(dblWri, strWri, strRea):
     # List with values for strings read
     resMatRea = [[], [], [], []]
     
+    
     # Initialize the simulation
-    init (dblWri, strWri, strRea)
+    init(dblWri, strWri, strRea)
+    
+    # FIXME: Are the name of sensors in Calbay and Database harmonized? If not and a 
+    # user sends "WattStopper:TRoom" and it happens that this is not existing in Calbay, 
+    # should the server do a mapping between names to make sure the testbed.py is searching for the 
+    # correct data in the database? 
+    # Note: On the server side, the script should always try to retrieve data in Calbay first, if they do not 
+    # exist, it should go to the database.
     
     # Set doubles and strings to be written
     # Note: Need to substract 2 from the length of strWri
     # for the username and the passwords strings
-    if (lenDblWri == 1):
-        name, value, msg, level = jsonParser(set(usrName, usrPwd, strWri[2], dblWri))
-        # Check logging
-        getlog(name, level, msg)
-        # Save data
-        resMatWri[0].append(name)
-        resMatWri[1].append(value)
-        resMatWri[2].append(msg)
-        resMatWri[3].append(level)
-    else:
-        for i in range(0, lenStrWri - 2):
-            name, value, msg, level =  jsonParser (set (usrName, usrPwd, strWri[i + 2], dblWri[i]))
-            # Check logging
-            getlog(name, level, msg)
-            # Save data
-            resMatWri[0].append(name)
-            resMatWri[1].append(value)
-            resMatWri[2].append(msg)
-            resMatWri[3].append(level)
+    #===========================================================================
+    # if(lenDblWri == 1):
+    #    name, value, msg, level = jsonParser(set(usrName, usrPwd, strWri[2], dblWri))
+    #    # Check logging
+    #    getlog(name, level, msg)
+    #    # Save data
+    #    resMatWri[0].append(name)
+    #    resMatWri[1].append(value)
+    #    resMatWri[2].append(msg)
+    #    resMatWri[3].append(level)
+    # else:
+    #    for i in range(0, lenStrWri - 2):
+    #        name, value, msg, level =  jsonParser(set(usrName, usrPwd, strWri[i + 2], dblWri[i]))
+    #        # Check logging
+    #        getlog(name, level, msg)
+    #        # Save data
+    #        resMatWri[0].append(name)
+    #        resMatWri[1].append(value)
+    #        resMatWri[2].append(msg)
+    #        resMatWri[3].append(level)
+    #===========================================================================
             
      # Get doubles values from strings to be read
     for i in range(0, lenStrRea):
-        name, value, msg, level = jsonParser (get (usrName, usrPwd, strRea[i]))
+        name, value, msg, level = jsonParser(get(usrName, usrPwd, strRea[i]))
         # Check logging
         getlog(name, level, msg)
         # Save data
@@ -420,7 +450,7 @@ def flexlab(dblWri, strWri, strRea):
         resMatRea[2].append(msg)
         resMatRea[3].append(level)       
     # Return scalar/vectors of values retrieved
-    if (lenStrRea == 1):
+    if(lenStrRea == 1):
         # Return scalar
         return resMatRea[1][0]
     else:
