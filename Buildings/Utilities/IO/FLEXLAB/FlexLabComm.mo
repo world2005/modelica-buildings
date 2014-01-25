@@ -54,7 +54,6 @@ end lightingController;
     annotation (Placement(transformation(extent={{-20,-10},{0,10}})));
   Python27.Flexlab pyt(
     moduleName="testFlexlab",
-    functionName="flexlab",
     nDblWri=1,
     nDblRea=1,
     samplePeriod=10,
@@ -62,7 +61,9 @@ end lightingController;
     nStrWri=1,
     nStrRea=1,
     strWri={"u1"},
-    strRea={"WattStopper.HS1--4126F--Dimmer Level-2"})
+    strRea={"WattStopper.HS1--4126F--Occupancy Sensor-1-LMPX-100"},
+    functionName="flexlab",
+    usrName="querydev")
     annotation (Placement(transformation(extent={{46,-10},{66,10}})));
 equation
   connect(const.y, pyt.uR[1]) annotation (Line(

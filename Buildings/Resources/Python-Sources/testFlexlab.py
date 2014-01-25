@@ -19,9 +19,24 @@
 import sys
 import os
 
+## ssh query@flexq '{"cmd":"GETDAQ","sys":"WattStopper","chn":"HS1--4126F--Occupancy Sensor-1-LMPX-100","user":"'${FLUSER}'","pass":"'${FLPASS}'"}'
+## ssh query@flexq '{"cmd":"GETDAQ","sys":"WattStopper","chn":"HS3--4126R--Light Level-1","user":"'${FLUSER}'","pass":"'${FLPASS}'"}'
+
+## ssh query@flexq '{"cmd":"GETCONFIG","sys":"WattStopper","chn":"HS1--4126F--Occupancy Sensor-1-LMPX-100","user":"'${FLUSER}'","pass":"'${FLPASS}'"}'
+## ssh query@flexq '{"cmd":"LOGIN","user":"'${FLUSER}'","pass":"'${FLPASS}'"}'
+## ssh query@flexq '{"cmd":"REQCHAN","user":"'${FLUSER}'","pass":"'${FLPASS}'"}'
+
+## ssh query@flexq '{"cmd":"GETUSERDATA","user":"'${FLUSER}'","pass":"'${FLPASS}'","cmdslp":5.0,"rcvsz":61234}'
+
+## ssh query@flexq '{"cmd":"GETWSALLCHANNEL","user":"'${FLUSER}'","pass":"'${FLPASS}'","cmdslp":5.0,"rcvsz":65536}'
+## ssh query@flexq '{"cmd":"GETWSALLVALUE","user":"'${FLUSER}'","pass":"'${FLPASS}'","cmdslp":0.1,"rcvsz":2048}'
+
+
 # Note: This hostname might changed in the future
-HOSTNAME = "128.3.20.130"
+#HOSTNAME = "128.3.20.130"
 # FOR TESTING
+HOSTNAME = "flexq.lbl.gov"
+#usrName = "querydev"
 #HOSTNAME = "128.3.22.128"
 
 # Note: This port might not be needed if SSH is used
@@ -29,6 +44,9 @@ PORT = 3500
 
 # Configuration file
 CFG_FILE = ".flexlab.cfg"
+
+#public key file
+ID_RSA = "id_rsa"
 
 # Global variables
 # Length of double to write
@@ -47,7 +65,7 @@ jsonStrWri = []
 # List that contains json for strings read
 jsonStrRea = []
 # Return value of SSH
-sshCli = []
+#sshCli = 0
 
 #===============================================================================
 # Json string generated from http://www.jsoneditoronline.org/
@@ -120,14 +138,17 @@ def jsonValidator(str):
     # If no exception is raised by validate(), the instance is valid.
     validate(str, schema)
 
-def connect(usr, pwd):
-    '''Establish an SSH connection using username and password.
+
+def query(usr, pwd, sys_chan, fla):
+    '''Establish an SSH connection using username and password and do a query.
 
     :param usr: Username.
     :param pwd: Password.
+    :param sys_chan: channel.
+    :param fla: flag for read.
 
     '''
-    global sshCli
+ 
     try:
         import paramiko
     except ImportError:
@@ -146,84 +167,173 @@ def connect(usr, pwd):
     # Try to connect without password
     else:
         try:
+            print "I am here"
+            privatekeyfile = os.path.expanduser('~/'+ ID_RSA)
+            usrkey = paramiko.RSAKey.from_private_key_file(privatekeyfile)
             sshCli.connect(HOSTNAME, username=usr
-                    , pkey='<key-file>')
+                    , pkey=usrkey)
         except IOError, e:
             raise IOError(str(e) + ". Connection cannot be established with"
                                  + " username: "  + usr + "!")
-     
-def get(usr, pwd, sys_chan):
-    '''Connect to server and retrieve value of control point.
-
-    :param usr: Username.
-    :param pwd: Password.
-    :param sys_chan: Channel name.
-    :return: JSON string.
-
-    '''
-    # Connect to server
-    connect(usr, pwd)
+            
+    # extract the system and the channel
+    sensor=sys_chan.split(".")
+    # save the system
+    system = sensor[0]
+    #save the channel name
+    channel = sensor[1]
     
     # Write command to execute. On the server side testbed.py is called.
-    # FIXME: make sure that script can be found on the server side.
-    cmd = "testbed.py" + " " + 'GETDAQ:' + sys_chan
-    #cmd = testbed.py + 'GETDAQ:' + sys_chan
-    # FOR TESTING
-    #cmd = 'echo test >> file2.txt'
-    
+    # FIXME parse the string and extract sys and channel
+    if (fla==1):
+        # Add command to get values   
+        cmd = '{"cmd":"GETDAQ","sys":"'+ system + '","chn":"' + channel + '","user":"ws_all","pass":"lblflexws"}'
+        #cmd='{"cmd":"GETDAQ","sys":"WattStopper","chn":"HS1--4126F--Occupancy Sensor-1-LMPX-100","user":"ws_all","pass":"lblflexws"}'
+    else:
+        # Add command to get values
+         cmd = '{"cmd":"GETDAQ","sys":"'+ system + '","chn":"' + channel + '","user":"ws_all","pass":"lblflexws"}'
     # Send command to server 
     try:
         stdin, stdout, stderr = sshCli.exec_command(cmd)
-        sshCli.close()
         if(len(stderr.read())!=0):
-           raise IOError(" An error occurs when trying to get data for "
-                         + sys_chan 
-                         + ". The error message returns is: "
-                         # FIXME: Check the string returned.
-                         + str(stderr)
-                         +"!") 
+            raise IOError(" An error occurs when trying to get data for "
+                          + sys_chan 
+                          + ". The error message returns is: "
+                          # FIXME: Check the string returned.
+                          + str(stderr)
+                          +"!") 
         return stdout.read()
         # FOR TESTING
         # return testJson
     except IOError, e :
         raise IOError(str(e) + ". Command: " + cmd + " cannot be executed!")
 
- 
-def set(usr, pwd, sys_chan, sys_chan_val):
-    '''Connect to server and retrieve value of control point.
-
-    :param usr: Username.
-    :param pwd: Password.
-    :param sys_chan: Channel name.
-    :param sys_chan_val: Channel value.
-    :return: JSON string.
-
-    '''
-    # Connect to server
-    connect(usr, pwd)
-    
-    # Write command to execute. On the server side testbed.py is called.
-    # FIXME: make sure that script can be found on the server side.
-    cmd = "testbed.py" + " " + 'SETDAQ:' + sys_chan + ':' + str(sys_chan_val)
-    # FOR TESTING
-    #cmd = 'echo test >> file1.txt'
-    
-    # Send command to server 
-    try:
-        stdin, stdout, stderr = sshCli.exec_command(cmd)
-        sshCli.close()
-        if(len(stderr.read())!=0):
-           raise IOError(" An error occurs when trying to set data for "
-                         + sys_chan 
-                         + ". The error message returns is: "
-                          # FIXME: Check the string returned.
-                         + str(stderr) 
-                         +"!") 
-        return stdout.read()
-        # FOR TESTING
-        #return testJson
-    except IOError, e :
-        raise IOError(str(e) + ". Command: " + cmd + " cannot be executed!")
+#===============================================================================
+# def connect(usr, pwd):
+#     '''Establish an SSH connection using username and password.
+# 
+#     :param usr: Username.
+#     :param pwd: Password.
+# 
+#     '''
+#     #global sshCli
+#  
+#     try:
+#         import paramiko
+#     except ImportError:
+#         raise ImportError('Module ``paramiko`` is required!')
+#     sshCli = paramiko.SSHClient()
+#     sshCli.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+#     
+#     # Check if a non-empty password has been provided.
+#     if(pwd != ""):
+#         try:
+#             sshCli.connect(HOSTNAME, username=usr, password=pwd)
+#         except IOError, e:
+#             raise IOError(str(e) + ". Connection cannot be established with" 
+#                             + " username: " + usr + " and"
+#                             + " password: " + pwd + "!")
+#     # Try to connect without password
+#     else:
+#         try:
+#             privatekeyfile = os.path.expanduser('~/'+ ID_RSA)
+#             usrkey = paramiko.RSAKey.from_private_key_file(privatekeyfile)
+#             sshCli.connect(HOSTNAME, username=usr
+#                     , pkey=usrkey)
+#         except IOError, e:
+#             raise IOError(str(e) + ". Connection cannot be established with"
+#                                  + " username: "  + usr + "!")
+#     return sshCli
+# 
+# def get(usr, pwd, sys_chan, sshCli):
+#     '''Connect to server and retrieve value of control point.
+# 
+#     :param usr: Username.
+#     :param pwd: Password.
+#     :param sys_chan: Channel name.
+#     :return: JSON string.
+# 
+#     '''    
+#     # extract the system and the channel
+#     sensor=sys_chan.split(".")
+#     
+#     # save the system
+#     system = sensor[0]
+#     
+#     #save the channel name
+#     channel = sensor[1]
+#     
+#     # Write command to execute. On the server side testbed.py is called.
+#     # FIXME parse the string and extract sys and channel
+#     #cmd = '{"cmd":"GETDAQ","sys":"'+ system + '","chn":"' + channel + '","user":"ws_all","pass":"lblflexws"}'
+#     cmd='{"cmd":"GETDAQ","sys":"WattStopper","chn":"HS1--4126F--Occupancy Sensor-1-LMPX-100","user":"ws_all","pass":"lblflexws"}'
+#     
+#     # Send command to server 
+#     try:
+#         stdin, stdout, stderr = sshCli.exec_command(cmd)
+#         sshCli.close()
+#         return stdout.read()
+#         #=======================================================================
+#         # if(len(stderr.read())!=0):
+#         #    raise IOError(" An error occurs when trying to get data for "
+#         #                  + sys_chan 
+#         #                  + ". The error message returns is: "
+#         #                  # FIXME: Check the string returned.
+#         #                  + str(stderr)
+#         #                  +"!") 
+#         # return stdout.read()
+#         #=======================================================================
+#         #return stdout.read()
+#         # FOR TESTING
+#         # return testJson
+#     except IOError, e :
+#         raise IOError(str(e) + ". Command: " + cmd + " cannot be executed!")
+# 
+# def set(usr, pwd, sys_chan, sys_chan_val):
+#     '''Connect to server and retrieve value of control point.
+# 
+#     :param usr: Username.
+#     :param pwd: Password.
+#     :param sys_chan: Channel name.
+#     :param sys_chan_val: Channel value.
+#     :return: JSON string.
+# 
+#     '''
+#     # Connect to server
+#     connect(usr, pwd)
+#     
+#      # extract the system and the channel
+#     sensor=sys_chan.split(".")
+#     
+#     # save the system
+#     system = sensor[0]
+#     
+#     #save the channel name
+#     channel = sensor[1]
+#     
+#     # Write command to execute. On the server side testbed.py is called.
+#     # FIXME parse the string and exctract sys and channel
+#     cmd = '{"cmd":"GETDAQ","sys":"'+ system + '","chn":"' + channel + '","user":"ws_all","pass":"lblflexws"}'
+#     # FOR TESTING
+#     #cmd = 'echo test >> file1.txt'
+#     
+#     # Send command to server 
+#     try:
+#         stdin, stdout, stderr = sshCli.exec_command(cmd)
+#         sshCli.close()
+#         if(len(stderr.read())!=0):
+#            raise IOError(" An error occurs when trying to set data for "
+#                          + sys_chan 
+#                          + ". The error message returns is: "
+#                           # FIXME: Check the string returned.
+#                          + str(stderr) 
+#                          +"!") 
+#         return stdout.read()
+#         # FOR TESTING
+#         #return testJson
+#     except IOError, e :
+#         raise IOError(str(e) + ". Command: " + cmd + " cannot be executed!")
+#===============================================================================
     
 def jsonParser(json_data):
     '''Parse the JSON retrieved from SSH.
@@ -394,6 +504,8 @@ def flexlab(dblWri, strWri, strRea):
         with username: usr and password: pwd!``
 
     '''    
+    # Multiple delimiters
+    import re
     # Redefine global variables
     global jsonStrRea
     global jsonStrWri
@@ -403,6 +515,8 @@ def flexlab(dblWri, strWri, strRea):
     # List with values for strings read
     resMatRea = [[], [], [], []]
     
+    # List with double values of sensor read
+    sensValarr = []
     
     # Initialize the simulation
     init(dblWri, strWri, strRea)
@@ -422,11 +536,6 @@ def flexlab(dblWri, strWri, strRea):
     #    name, value, msg, level = jsonParser(set(usrName, usrPwd, strWri[2], dblWri))
     #    # Check logging
     #    getlog(name, level, msg)
-    #    # Save data
-    #    resMatWri[0].append(name)
-    #    resMatWri[1].append(value)
-    #    resMatWri[2].append(msg)
-    #    resMatWri[3].append(level)
     # else:
     #    for i in range(0, lenStrWri - 2):
     #        name, value, msg, level =  jsonParser(set(usrName, usrPwd, strWri[i + 2], dblWri[i]))
@@ -438,23 +547,28 @@ def flexlab(dblWri, strWri, strRea):
     #        resMatWri[2].append(msg)
     #        resMatWri[3].append(level)
     #===========================================================================
-            
-     # Get doubles values from strings to be read
-    for i in range(0, lenStrRea):
-        name, value, msg, level = jsonParser(get(usrName, usrPwd, strRea[i]))
-        # Check logging
-        getlog(name, level, msg)
-        # Save data
-        resMatRea[0].append(name)
-        resMatRea[1].append(value)
-        resMatRea[2].append(msg)
-        resMatRea[3].append(level)       
-    # Return scalar/vectors of values retrieved
+          
+    # Get doubles values from strings to be read
+    
     if(lenStrRea == 1):
-        # Return scalar
-        return resMatRea[1][0]
+        #name, value, msg, level = jsonParser(get(usrName, usrPwd, strRea))
+        #sensVal = 10
+        sensVal = re.split('[] []',query(usrName, usrPwd, strRea, 1))
+        # Check logging
+        #getlog(name, level, msg)
+        return float(sensVal[1])
     else:
-        # Return vector if List
-         return resMatRea[1]
+        for i in range(0, lenStrRea):
+            #name, value, msg, level = jsonParser(get(usrName, usrPwd, strRea[i]))
+            sensVal = re.split('[] []',query(usrName, usrPwd, strRea, 1))
+            # Check logging
+            #getlog(name, level, msg)
+            # Save data
+            #resMatRea[0].append(name)
+            #resMatRea[1].append(value)
+            #resMatRea[2].append(msg)
+            #resMatRea[3].append(level)
+            sensValarr.append(float(sensVal[1]))
+        return sensValarr           
         
 

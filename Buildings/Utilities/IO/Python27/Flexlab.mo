@@ -8,14 +8,15 @@ model Flexlab "Block that exchanges a vector of real values with flexlab"
   parameter String usrName="USER" "Name of user";
   parameter String usrPwd="" "Password of user";
 
-  parameter Integer nDblWri(min=1) "Number of double values to write to Python";
-  parameter Integer nDblRea(min=1)
+  parameter Integer nDblWri(min=1) = 1
+    "Number of double values to write to Python";
+  parameter Integer nDblRea(min=1) = 1
     "Number of double values to be read from the Python";
   parameter Integer flaDblWri[nDblWri] = zeros(nDblWri)
     "Flag for double values (0: use current value, 1: use average over interval, 2: use integral over interval)";
 
-  parameter Integer nStrWri(min=1) "Number of strings to write";
-  parameter Integer nStrRea(min=1) "Number of strings to read";
+  parameter Integer nStrWri(min=1) = 1 "Number of strings to write";
+  parameter Integer nStrRea(min=1) = 1 "Number of strings to read";
 
   parameter String  strWri[max(1, nStrWri)] "String values to write";
   parameter String  strRea[max(1, nStrRea)] "String values to read";
