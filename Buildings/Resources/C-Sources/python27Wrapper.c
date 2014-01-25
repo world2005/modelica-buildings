@@ -16,7 +16,6 @@
 //  strValWri    - String values to write.
 //  nStrWri      - Number of strings to write.
 #include <ModelicaUtilities.h>
-#include "pythonInterpreter.h"
 void pythonExchangeValues(const char * moduleName,
                           const char * functionName,
                           const double * dblValWri, int nDblWri,
@@ -63,7 +62,7 @@ void pythonExchangeValuesFlexlab(const char * moduleName,
                           const int * intValWri, int nIntWri,
                           int * intValRea, int nIntRea,
                           const char ** strValWri, int nStrWri,
-						  const char ** strValRea, int nStrRea)
+			  const char ** strValRea, int nStrRea)
 {
   pythonExchangeValuesFlexlabNoModelica(
    moduleName,

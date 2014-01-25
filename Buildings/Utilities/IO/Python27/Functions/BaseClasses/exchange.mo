@@ -22,7 +22,7 @@ function exchange "Function that communicates with Python"
   output Real    dblRea[max(1, nDblRea)] "Double values returned by Python";
   output Integer intRea[max(1, nIntRea)] "Integer values returned by Python";
 
-  external "C" pythonExchangeValuesFlexlab(moduleName, functionName,
+  external "C" pythonExchangeValues(moduleName, functionName,
                                     dblWri, nDblWri,
                                     dblRea, nDblRea,
                                     intWri, nIntWri,
@@ -30,7 +30,7 @@ function exchange "Function that communicates with Python"
                                     strWri, nStrWri)
     annotation (Library={"ModelicaBuildingsPython2.7",  "python2.7"},
       LibraryDirectory={"modelica://Buildings/Resources/Library"},
-      IncludeDirectory="modelica://Buildings/Resources/src/python",
+      IncludeDirectory="modelica://Buildings/Resources/C-Sources",
       Include="#include \"python27Wrapper.c\"");
 
   annotation (Documentation(info="<html>
