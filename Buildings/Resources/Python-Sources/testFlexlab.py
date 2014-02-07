@@ -167,7 +167,6 @@ def query(usr, pwd, sys_chan, fla):
     # Try to connect without password
     else:
         try:
-            print "I am here"
             privatekeyfile = os.path.expanduser('~/'+ ID_RSA)
             usrkey = paramiko.RSAKey.from_private_key_file(privatekeyfile)
             sshCli.connect(HOSTNAME, username=usr
@@ -208,132 +207,7 @@ def query(usr, pwd, sys_chan, fla):
     except IOError, e :
         raise IOError(str(e) + ". Command: " + cmd + " cannot be executed!")
 
-#===============================================================================
-# def connect(usr, pwd):
-#     '''Establish an SSH connection using username and password.
-# 
-#     :param usr: Username.
-#     :param pwd: Password.
-# 
-#     '''
-#     #global sshCli
-#  
-#     try:
-#         import paramiko
-#     except ImportError:
-#         raise ImportError('Module ``paramiko`` is required!')
-#     sshCli = paramiko.SSHClient()
-#     sshCli.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-#     
-#     # Check if a non-empty password has been provided.
-#     if(pwd != ""):
-#         try:
-#             sshCli.connect(HOSTNAME, username=usr, password=pwd)
-#         except IOError, e:
-#             raise IOError(str(e) + ". Connection cannot be established with" 
-#                             + " username: " + usr + " and"
-#                             + " password: " + pwd + "!")
-#     # Try to connect without password
-#     else:
-#         try:
-#             privatekeyfile = os.path.expanduser('~/'+ ID_RSA)
-#             usrkey = paramiko.RSAKey.from_private_key_file(privatekeyfile)
-#             sshCli.connect(HOSTNAME, username=usr
-#                     , pkey=usrkey)
-#         except IOError, e:
-#             raise IOError(str(e) + ". Connection cannot be established with"
-#                                  + " username: "  + usr + "!")
-#     return sshCli
-# 
-# def get(usr, pwd, sys_chan, sshCli):
-#     '''Connect to server and retrieve value of control point.
-# 
-#     :param usr: Username.
-#     :param pwd: Password.
-#     :param sys_chan: Channel name.
-#     :return: JSON string.
-# 
-#     '''    
-#     # extract the system and the channel
-#     sensor=sys_chan.split(".")
-#     
-#     # save the system
-#     system = sensor[0]
-#     
-#     #save the channel name
-#     channel = sensor[1]
-#     
-#     # Write command to execute. On the server side testbed.py is called.
-#     # FIXME parse the string and extract sys and channel
-#     #cmd = '{"cmd":"GETDAQ","sys":"'+ system + '","chn":"' + channel + '","user":"ws_all","pass":"lblflexws"}'
-#     cmd='{"cmd":"GETDAQ","sys":"WattStopper","chn":"HS1--4126F--Occupancy Sensor-1-LMPX-100","user":"ws_all","pass":"lblflexws"}'
-#     
-#     # Send command to server 
-#     try:
-#         stdin, stdout, stderr = sshCli.exec_command(cmd)
-#         sshCli.close()
-#         return stdout.read()
-#         #=======================================================================
-#         # if(len(stderr.read())!=0):
-#         #    raise IOError(" An error occurs when trying to get data for "
-#         #                  + sys_chan 
-#         #                  + ". The error message returns is: "
-#         #                  # FIXME: Check the string returned.
-#         #                  + str(stderr)
-#         #                  +"!") 
-#         # return stdout.read()
-#         #=======================================================================
-#         #return stdout.read()
-#         # FOR TESTING
-#         # return testJson
-#     except IOError, e :
-#         raise IOError(str(e) + ". Command: " + cmd + " cannot be executed!")
-# 
-# def set(usr, pwd, sys_chan, sys_chan_val):
-#     '''Connect to server and retrieve value of control point.
-# 
-#     :param usr: Username.
-#     :param pwd: Password.
-#     :param sys_chan: Channel name.
-#     :param sys_chan_val: Channel value.
-#     :return: JSON string.
-# 
-#     '''
-#     # Connect to server
-#     connect(usr, pwd)
-#     
-#      # extract the system and the channel
-#     sensor=sys_chan.split(".")
-#     
-#     # save the system
-#     system = sensor[0]
-#     
-#     #save the channel name
-#     channel = sensor[1]
-#     
-#     # Write command to execute. On the server side testbed.py is called.
-#     # FIXME parse the string and exctract sys and channel
-#     cmd = '{"cmd":"GETDAQ","sys":"'+ system + '","chn":"' + channel + '","user":"ws_all","pass":"lblflexws"}'
-#     # FOR TESTING
-#     #cmd = 'echo test >> file1.txt'
-#     
-#     # Send command to server 
-#     try:
-#         stdin, stdout, stderr = sshCli.exec_command(cmd)
-#         sshCli.close()
-#         if(len(stderr.read())!=0):
-#            raise IOError(" An error occurs when trying to set data for "
-#                          + sys_chan 
-#                          + ". The error message returns is: "
-#                           # FIXME: Check the string returned.
-#                          + str(stderr) 
-#                          +"!") 
-#         return stdout.read()
-#         # FOR TESTING
-#         #return testJson
-#     except IOError, e :
-#         raise IOError(str(e) + ". Command: " + cmd + " cannot be executed!")
-#===============================================================================
+
     
 def jsonParser(json_data):
     '''Parse the JSON retrieved from SSH.
