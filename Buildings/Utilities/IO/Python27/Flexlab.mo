@@ -5,7 +5,7 @@ model Flexlab "Block that exchanges a vector of real values with flexlab"
   parameter String moduleName
     "Name of the python module that contains the function";
   parameter String functionName=moduleName "Name of the python function";
-  parameter String usrName="USER" "Name of user";
+  parameter String usrName="" "Name of user";
   parameter String usrPwd="" "Password of user";
 
   parameter Integer nDblWri(min=1) = 1

@@ -53,7 +53,6 @@ end lightingController;
   Modelica.Blocks.Sources.Constant const
     annotation (Placement(transformation(extent={{-20,-10},{0,10}})));
   Python27.Flexlab pyt(
-    moduleName="testFlexlab",
     nDblWri=1,
     nDblRea=1,
     samplePeriod=10,
@@ -62,8 +61,9 @@ end lightingController;
     nStrRea=1,
     strWri={"u1"},
     strRea={"WattStopper.HS1--4126F--Occupancy Sensor-1-LMPX-100"},
-    functionName="flexlab",
-    usrName="querydev")
+    moduleName="flexlab",
+    functionName="execute",
+    usrName="")
     annotation (Placement(transformation(extent={{46,-10},{66,10}})));
 equation
   connect(const.y, pyt.uR[1]) annotation (Line(
