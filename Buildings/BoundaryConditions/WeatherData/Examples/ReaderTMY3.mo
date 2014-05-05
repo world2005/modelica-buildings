@@ -4,7 +4,7 @@ model ReaderTMY3 "Test model for reading weather data"
   Buildings.BoundaryConditions.WeatherData.ReaderTMY3 weaDat(
     filNam="modelica://Buildings/Resources/weatherdata/USA_IL_Chicago-OHare.Intl.AP.725300_TMY3.mos")
     "Weather data reader"
-    annotation (Placement(transformation(extent={{-20,40},{0,60}})));
+    annotation (Placement(transformation(extent={{-20,42},{0,62}})));
   Buildings.BoundaryConditions.WeatherData.ReaderTMY3 weaDatInpCon(filNam=
         "modelica://Buildings/Resources/weatherdata/USA_IL_Chicago-OHare.Intl.AP.725300_TMY3.mos",
       HSou=Buildings.BoundaryConditions.Types.RadiationDataSource.Input_HGloHor_HDifHor)
@@ -17,7 +17,7 @@ model ReaderTMY3 "Test model for reading weather data"
 equation
   connect(HGloHor.y, weaDatInpCon.HGloHor_in)
                                          annotation (Line(
-      points={{-59,-10},{-28,-10},{-28,-55},{-21,-55}},
+      points={{-59,-10},{-28,-10},{-28,-58.6},{-21,-58.6}},
       color={0,0,127},
       smooth=Smooth.None));
   connect(HDifHor.y, weaDatInpCon.HDifHor_in)
