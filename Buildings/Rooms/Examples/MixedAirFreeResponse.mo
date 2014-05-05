@@ -89,9 +89,13 @@ model MixedAirFreeResponse "Free response of room model"
     annotation (Placement(transformation(extent={{-20,40},{0,60}})));
   Modelica.Blocks.Sources.Constant qLatGai_flow(k=0) "Latent heat gain"
     annotation (Placement(transformation(extent={{-62,2},{-42,22}})));
-  Buildings.BoundaryConditions.WeatherData.ReaderTMY3 weaDat(
-    filNam="modelica://Buildings/Resources/weatherdata/USA_IL_Chicago-OHare.Intl.AP.725300_TMY3.mos")
-    annotation (Placement(transformation(extent={{160,140},{180,160}})));
+  BoundaryConditions.WeatherData.BaseClasses.Reader   weaDat(
+    TDryBulSou=Buildings.BoundaryConditions.Types.DataSource.Input,
+    ceiHeiSou=Buildings.BoundaryConditions.Types.DataSource.Parameter,
+    totSkyCovSou=Buildings.BoundaryConditions.Types.DataSource.Parameter,
+    opaSkyCovSou=Buildings.BoundaryConditions.Types.DataSource.Parameter,
+    HInfHorSou=Buildings.BoundaryConditions.Types.DataSource.Parameter)
+    annotation (Placement(transformation(extent={{158,140},{178,160}})));
   Modelica.Blocks.Sources.Constant uSha(k=0)
     "Control signal for the shading device"
     annotation (Placement(transformation(extent={{-20,90},{0,110}})));
@@ -137,7 +141,7 @@ equation
       smooth=Smooth.None));
 
   connect(weaDat.weaBus, roo.weaBus) annotation (Line(
-      points={{180,150},{190,150},{190,57.9},{83.9,57.9}},
+      points={{178,150},{190,150},{190,57.9},{83.9,57.9}},
       color={255,204,51},
       thickness=0.5,
       smooth=Smooth.None));

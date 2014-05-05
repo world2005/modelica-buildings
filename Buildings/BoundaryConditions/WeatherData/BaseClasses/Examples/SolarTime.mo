@@ -10,6 +10,8 @@ model SolarTime "Test model for solar time"
     annotation (Placement(transformation(extent={{20,-20},{40,0}})));
   Buildings.BoundaryConditions.WeatherData.BaseClasses.EquationOfTime eqnTim
     annotation (Placement(transformation(extent={{-20,0},{0,20}})));
+  Reader weaDat
+    annotation (Placement(transformation(extent={{-46,46},{-26,66}})));
 equation
   connect(simTim.y, locTim.cloTim) annotation (Line(
       points={{-39,-10},{-30,-10},{-30,-30},{-22,-30}},
@@ -27,7 +29,7 @@ equation
       points={{1,10},{8,10},{8,-4},{18,-4}},
       color={0,0,127},
       smooth=Smooth.None));
-  annotation (Diagram(graphics), 
+  annotation (Diagram(graphics),
 experiment(StopTime=864000),
 __Dymola_Commands(file="modelica://Buildings/Resources/Scripts/Dymola/BoundaryConditions/WeatherData/BaseClasses/Examples/SolarTime.mos"
         "Simulate and plot"));

@@ -29,11 +29,11 @@ equation
       color={0,0,127},
       smooth=Smooth.None));
   connect(datRea.y[8], conGloRad.HIn) annotation (Line(
-      points={{1,10},{10,10},{10,30},{18,30}},
+      points={{1,9.51724},{10,9.51724},{10,30},{18,30}},
       color={0,0,127},
       smooth=Smooth.None));
   connect(datRea.y[10], conDifRad.HIn) annotation (Line(
-      points={{1,10},{10,10},{10,-10},{18,-10}},
+      points={{1,9.65517},{10,9.65517},{10,-10},{18,-10}},
       color={0,0,127},
       smooth=Smooth.None));
   connect(simTim.y, timCon.simTim) annotation (Line(

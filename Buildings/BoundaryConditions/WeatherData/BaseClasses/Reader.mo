@@ -6,7 +6,7 @@ block Reader "Reader for weather data"
     annotation(Evaluate=true);
   //--------------------------------------------------------------
   // Atmospheric pressure
-  parameter Buildings.BoundaryConditions.Types.DataSource pAtmSou=Buildings.BoundaryConditions.Types.DataSource.Parameter
+  parameter Buildings.BoundaryConditions.Types.DataSourceSimple pAtmSou=Buildings.BoundaryConditions.Types.DataSourceSimple.Parameter
     "Atmospheric pressure"
     annotation (Evaluate=true, Dialog(group="Data source"));
   parameter Modelica.SIunits.Pressure pAtm=101325
@@ -15,13 +15,13 @@ block Reader "Reader for weather data"
   Modelica.Blocks.Interfaces.RealInput pAtm_in(
     final quantity="Pressure",
     final unit="Pa",
-    displayUnit="Pa") if (pAtmSou == Buildings.BoundaryConditions.Types.DataSource.Input)
+    displayUnit="Pa") if (pAtmSou == Buildings.BoundaryConditions.Types.DataSourceSimple.Input)
     "Input pressure"
     annotation (Placement(transformation(extent={{-240,260},{-200,300}}),
         iconTransformation(extent={{-240,260},{-200,300}})));
   //--------------------------------------------------------------
   // Ceiling height
-  parameter Buildings.BoundaryConditions.Types.DataSource ceiHeiSou=Buildings.BoundaryConditions.Types.DataSource.Parameter
+  parameter Buildings.BoundaryConditions.Types.DataSourceSimple ceiHeiSou=Buildings.BoundaryConditions.Types.DataSourceSimple.Parameter
     "Ceiling height" annotation (Evaluate=true, Dialog(group="Data source"));
   parameter Real ceiHei(
     final quantity="Height",
@@ -31,13 +31,13 @@ block Reader "Reader for weather data"
   Modelica.Blocks.Interfaces.RealInput ceiHei_in(
     final quantity="Height",
     final unit="m",
-    displayUnit="m") if (ceiHeiSou == Buildings.BoundaryConditions.Types.DataSource.Input)
+    displayUnit="m") if (ceiHeiSou == Buildings.BoundaryConditions.Types.DataSourceSimple.Input)
     "Input ceiling height"
     annotation (Placement(transformation(extent={{-240,26},{-200,66}}),
         iconTransformation(extent={{-240,26},{-200,66}})));
   //--------------------------------------------------------------
   // Total sky cover
-  parameter Buildings.BoundaryConditions.Types.DataSource totSkyCovSou=Buildings.BoundaryConditions.Types.DataSource.Parameter
+  parameter Buildings.BoundaryConditions.Types.DataSourceSimple totSkyCovSou=Buildings.BoundaryConditions.Types.DataSourceSimple.Parameter
     "Total sky cover" annotation (Evaluate=true, Dialog(group="Data source"));
   parameter Real totSkyCov(
     min=0,
@@ -47,12 +47,12 @@ block Reader "Reader for weather data"
   Modelica.Blocks.Interfaces.RealInput totSkyCov_in(
     min=0,
     max=1,
-    unit="1") if (totSkyCovSou == Buildings.BoundaryConditions.Types.DataSource.Input)
+    unit="1") if (totSkyCovSou == Buildings.BoundaryConditions.Types.DataSourceSimple.Input)
     "Input total sky cover"
     annotation (Placement(transformation(extent={{-240,-20},{-200,20}}),
         iconTransformation(extent={{-240,-20},{-200,20}})));
   // Opaque sky cover
-  parameter Buildings.BoundaryConditions.Types.DataSource opaSkyCovSou=Buildings.BoundaryConditions.Types.DataSource.Parameter
+  parameter Buildings.BoundaryConditions.Types.DataSourceSimple opaSkyCovSou=Buildings.BoundaryConditions.Types.DataSourceSimple.Parameter
     "Opaque sky cover" annotation (Evaluate=true, Dialog(group="Data source"));
   parameter Real opaSkyCov(
     min=0,
@@ -62,13 +62,13 @@ block Reader "Reader for weather data"
   Modelica.Blocks.Interfaces.RealInput opaSkyCov_in(
     min=0,
     max=1,
-    unit="1") if (opaSkyCovSou == Buildings.BoundaryConditions.Types.DataSource.Input)
+    unit="1") if (opaSkyCovSou == Buildings.BoundaryConditions.Types.DataSourceSimple.Input)
     "Input opaque sky cover"
     annotation (Placement(transformation(extent={{-240,72},{-200,112}}),
         iconTransformation(extent={{-240,72},{-200,112}})));
   //--------------------------------------------------------------
   // Dry bulb temperature
-  parameter Buildings.BoundaryConditions.Types.DataSource TDryBulSou=Buildings.BoundaryConditions.Types.DataSource.Parameter
+  parameter Buildings.BoundaryConditions.Types.DataSourceSimple TDryBulSou=Buildings.BoundaryConditions.Types.DataSourceSimple.Parameter
     "Dry bulb temperature"
     annotation (Evaluate=true, Dialog(group="Data source"));
   parameter Modelica.SIunits.Temperature TDryBul(displayUnit="degC") = 293.15
@@ -77,12 +77,12 @@ block Reader "Reader for weather data"
   Modelica.Blocks.Interfaces.RealInput TDryBul_in(
     final quantity="ThermodynamicTemperature",
     final unit="K",
-    displayUnit="degC") if (TDryBulSou == Buildings.BoundaryConditions.Types.DataSource.Input)
+    displayUnit="degC") if (TDryBulSou == Buildings.BoundaryConditions.Types.DataSourceSimple.Input)
     "Input dry bulb temperature"
     annotation (Placement(transformation(extent={{-240,172},{-200,212}})));
   //--------------------------------------------------------------
   // Dew point temperature
-  parameter Buildings.BoundaryConditions.Types.DataSource TDewPoiSou=Buildings.BoundaryConditions.Types.DataSource.Parameter
+  parameter Buildings.BoundaryConditions.Types.DataSourceSimple TDewPoiSou=Buildings.BoundaryConditions.Types.DataSourceSimple.Parameter
     "Dew point temperature"
     annotation (Evaluate=true, Dialog(group="Data source"));
   parameter Modelica.SIunits.Temperature TDewPoi(displayUnit="degC") = 283.15
@@ -91,12 +91,12 @@ block Reader "Reader for weather data"
   Modelica.Blocks.Interfaces.RealInput TDewPoi_in(
     final quantity="ThermodynamicTemperature",
     final unit="K",
-    displayUnit="degC") if (TDryBulSou == Buildings.BoundaryConditions.Types.DataSource.Input)
+    displayUnit="degC") if (TDewPoiSou == Buildings.BoundaryConditions.Types.DataSourceSimple.Input)
     "Input dew point temperature"
     annotation (Placement(transformation(extent={{-240,212},{-200,252}})));
   //--------------------------------------------------------------
   // Relative humidity
-  parameter Buildings.BoundaryConditions.Types.DataSource relHumSou=Buildings.BoundaryConditions.Types.DataSource.Parameter
+  parameter Buildings.BoundaryConditions.Types.DataSourceSimple relHumSou=Buildings.BoundaryConditions.Types.DataSourceSimple.Parameter
     "Relative humidity" annotation (Evaluate=true, Dialog(group="Data source"));
   parameter Real relHum(
     min=0,
@@ -106,13 +106,13 @@ block Reader "Reader for weather data"
   Modelica.Blocks.Interfaces.RealInput relHum_in(
     min=0,
     max=1,
-    unit="1") if (relHumSou == Buildings.BoundaryConditions.Types.DataSource.Input)
+    unit="1") if (relHumSou == Buildings.BoundaryConditions.Types.DataSourceSimple.Input)
     "Input relative humidity"
     annotation (Placement(transformation(extent={{-240,122},{-200,162}}),
         iconTransformation(extent={{-240,122},{-200,162}})));
   //--------------------------------------------------------------
   // Wind speed
-  parameter Buildings.BoundaryConditions.Types.DataSource winSpeSou=Buildings.BoundaryConditions.Types.DataSource.Parameter
+  parameter Buildings.BoundaryConditions.Types.DataSourceSimple winSpeSou=Buildings.BoundaryConditions.Types.DataSourceSimple.Parameter
     "Wind speed" annotation (Evaluate=true, Dialog(group="Data source"));
   parameter Modelica.SIunits.Velocity winSpe(min=0) = 1
     "Wind speed (used if winSpe=Parameter)"
@@ -120,13 +120,13 @@ block Reader "Reader for weather data"
   Modelica.Blocks.Interfaces.RealInput winSpe_in(
     final quantity="Velocity",
     final unit="m/s",
-    min=0) if (winSpeSou == Buildings.BoundaryConditions.Types.DataSource.Input)
+    min=0) if (winSpeSou == Buildings.BoundaryConditions.Types.DataSourceSimple.Input)
     "Input wind speed"
     annotation (Placement(transformation(extent={{-240,-66},{-200,-26}}),
         iconTransformation(extent={{-240,-66},{-200,-26}})));
   //--------------------------------------------------------------
   // Wind direction
-  parameter Buildings.BoundaryConditions.Types.DataSource winDirSou=Buildings.BoundaryConditions.Types.DataSource.Parameter
+  parameter Buildings.BoundaryConditions.Types.DataSourceSimple winDirSou=Buildings.BoundaryConditions.Types.DataSourceSimple.Parameter
     "Wind direction" annotation (Evaluate=true, Dialog(group="Data source"));
   parameter Modelica.SIunits.Angle winDir=1.0
     "Wind direction (used if winDir=Parameter)"
@@ -134,20 +134,20 @@ block Reader "Reader for weather data"
   Modelica.Blocks.Interfaces.RealInput winDir_in(
     final quantity="Angle",
     final unit="rad",
-    displayUnit="deg") if (winDirSou == Buildings.BoundaryConditions.Types.DataSource.Input)
+    displayUnit="deg") if (winDirSou == Buildings.BoundaryConditions.Types.DataSourceSimple.Input)
     "Input wind direction"
     annotation (Placement(transformation(extent={{-240,-108},{-200,-68}}),
         iconTransformation(extent={{-240,-108},{-200,-68}})));
   //--------------------------------------------------------------
   // Infrared horizontal radiation
-  parameter Buildings.BoundaryConditions.Types.DataSource HInfHorSou=Buildings.BoundaryConditions.Types.DataSource.Parameter
+  parameter Buildings.BoundaryConditions.Types.DataSourceSimple HInfHorSou=Buildings.BoundaryConditions.Types.DataSourceSimple.Parameter
     "Infrared horizontal radiation" annotation (Evaluate=true, Dialog(group="Data source"));
   parameter Modelica.SIunits.HeatFlux HInfHor = 0.0
     "Infrared horizontal radiation (used if HInfHorSou=Parameter)"
     annotation (Evaluate=true, Dialog(group="Data source"));
   Modelica.Blocks.Interfaces.RealInput HInfHor_in(
     final quantity="RadiantEnergyFluenceRate",
-    final unit="W/m2") if (HInfHorSou == Buildings.BoundaryConditions.Types.DataSource.Input)
+    final unit="W/m2") if (HInfHorSou == Buildings.BoundaryConditions.Types.DataSourceSimple.Input)
     "Input Infrared horizontal radiation"
     annotation (Placement(transformation(extent={{-240,-152},{-200,-112}}),
         iconTransformation(extent={{-240,-152},{-200,-112}})));
@@ -321,7 +321,7 @@ protected
 equation
   //---------------------------------------------------------------------------
   // Select atmospheric pressure connector
-  if pAtmSou == Buildings.BoundaryConditions.Types.DataSource.Parameter then
+  if pAtmSou == Buildings.BoundaryConditions.Types.DataSourceSimple.Parameter then
     pAtm_in_internal = pAtm;
   else
     connect(pAtm_in, pAtm_in_internal);
@@ -329,7 +329,7 @@ equation
   connect(pAtm_in_internal, chePre.PIn);
   //---------------------------------------------------------------------------
   // Select ceiling height connector
-  if ceiHeiSou == Buildings.BoundaryConditions.Types.DataSource.Parameter then
+  if ceiHeiSou == Buildings.BoundaryConditions.Types.DataSourceSimple.Parameter then
     ceiHei_in_internal = ceiHei;
   else
     connect(ceiHei_in, ceiHei_in_internal);
@@ -338,7 +338,7 @@ equation
 
   //---------------------------------------------------------------------------
   // Select total sky cover connector
-  if totSkyCovSou == Buildings.BoundaryConditions.Types.DataSource.Parameter then
+  if totSkyCovSou == Buildings.BoundaryConditions.Types.DataSourceSimple.Parameter then
     totSkyCov_in_internal = totSkyCov;
   else
     connect(totSkyCov_in, totSkyCov_in_internal);
@@ -346,7 +346,7 @@ equation
   connect(totSkyCov_in_internal, cheTotSkyCov.nIn);
   //---------------------------------------------------------------------------
   // Select opaque sky cover connector
-  if opaSkyCovSou == Buildings.BoundaryConditions.Types.DataSource.Parameter then
+  if opaSkyCovSou == Buildings.BoundaryConditions.Types.DataSourceSimple.Parameter then
     opaSkyCov_in_internal = opaSkyCov;
   else
     connect(opaSkyCov_in, opaSkyCov_in_internal);
@@ -354,7 +354,7 @@ equation
   connect(opaSkyCov_in_internal, cheOpaSkyCov.nIn);
   //---------------------------------------------------------------------------
   // Select dew point temperature connector
-  if TDewPoiSou == Buildings.BoundaryConditions.Types.DataSource.Parameter then
+  if TDewPoiSou == Buildings.BoundaryConditions.Types.DataSourceSimple.Parameter then
     TDewPoi_in_internal = TDewPoi;
   else
     connect(TDewPoi_in, TDewPoi_in_internal);
@@ -362,7 +362,7 @@ equation
   connect(TDewPoi_in_internal, cheTemDewPoi.TIn);
   //---------------------------------------------------------------------------
   // Select dry bulb temperature connector
-  if TDryBulSou == Buildings.BoundaryConditions.Types.DataSource.Parameter then
+  if TDryBulSou == Buildings.BoundaryConditions.Types.DataSourceSimple.Parameter then
     TDryBul_in_internal = TDryBul;
   else
     connect(TDryBul_in, TDryBul_in_internal);
@@ -370,7 +370,7 @@ equation
   connect(TDryBul_in_internal, cheTemDryBul.TIn);
   //---------------------------------------------------------------------------
   // Select relative humidity connector
-  if relHumSou == Buildings.BoundaryConditions.Types.DataSource.Parameter then
+  if relHumSou == Buildings.BoundaryConditions.Types.DataSourceSimple.Parameter then
     relHum_in_internal = relHum;
   else
     connect(relHum_in, relHum_in_internal);
@@ -378,7 +378,7 @@ equation
   connect(relHum_in_internal, cheRelHum.relHumIn);
   //---------------------------------------------------------------------------
   // Select wind speed connector
-  if winSpeSou == Buildings.BoundaryConditions.Types.DataSource.Parameter then
+  if winSpeSou == Buildings.BoundaryConditions.Types.DataSourceSimple.Parameter then
     winSpe_in_internal = winSpe;
   else
     connect(winSpe_in, winSpe_in_internal);
@@ -386,7 +386,7 @@ equation
   connect(winSpe_in_internal, cheWinSpe.winSpeIn);
   //---------------------------------------------------------------------------
   // Select wind direction connector
-  if winDirSou == Buildings.BoundaryConditions.Types.DataSource.Parameter then
+  if winDirSou == Buildings.BoundaryConditions.Types.DataSourceSimple.Parameter then
     winDir_in_internal = winDir;
   else
     connect(winDir_in, winDir_in_internal);
@@ -426,7 +426,7 @@ equation
 
   //---------------------------------------------------------------------------
   // Select infrared radiation connector
-  if HInfHorSou == Buildings.BoundaryConditions.Types.DataSource.Parameter then
+  if HInfHorSou == Buildings.BoundaryConditions.Types.DataSourceSimple.Parameter then
     HInfHor_in_internal = HInfHor;
   else
     connect(HInfHor_in, HInfHor_in_internal);
@@ -691,27 +691,27 @@ equation
           textString="%name",
           lineColor={0,0,255}),
         Text(
-          visible=(pAtmSou == Buildings.BoundaryConditions.Types.DataSource.Input),
+          visible=(pAtmSou == Buildings.BoundaryConditions.Types.DataSourceSimple.Input),
           extent={{-190,216},{-164,184}},
           lineColor={0,0,127},
           textString="p"),
         Text(
-          visible=(TDryBulSou == Buildings.BoundaryConditions.Types.DataSource.Input),
+          visible=(TDryBulSou == Buildings.BoundaryConditions.Types.DataSourceSimple.Input),
           extent={{-194,162},{-118,118}},
           lineColor={0,0,127},
           textString="TDryBul"),
         Text(
-          visible=(relHumSou == Buildings.BoundaryConditions.Types.DataSource.Input),
+          visible=(relHumSou == Buildings.BoundaryConditions.Types.DataSourceSimple.Input),
           extent={{-190,92},{-104,66}},
           lineColor={0,0,127},
           textString="relHum"),
         Text(
-        visible=(winSpeSou == Buildings.BoundaryConditions.Types.DataSource.Input),
+        visible=(winSpeSou == Buildings.BoundaryConditions.Types.DataSourceSimple.Input),
           extent={{-196,44},{-110,2}},
           lineColor={0,0,127},
           textString="winSpe"),
         Text(
-          visible=(winDirSou == Buildings.BoundaryConditions.Types.DataSource.Input),
+          visible=(winDirSou == Buildings.BoundaryConditions.Types.DataSourceSimple.Input),
           extent={{-192,-18},{-106,-60}},
           lineColor={0,0,127},
           textString="winDir"),
@@ -842,8 +842,8 @@ parameter <code>pAtm=101325</code> Pascals.
 The parameter <code>*Sou</code> configures the source of the data.
 For the atmospheric pressure, dry bulb temperature, relative humidity, wind speed and wind direction,
 the enumeration
-<a href=\"modelica://Buildings.BoundaryConditions.Types.DataSource\">
-Buildings.BoundaryConditions.Types.DataSource</a>
+<a href=\"modelica://Buildings.BoundaryConditions.Types.DataSourceSimple\">
+Buildings.BoundaryConditions.Types.DataSourceSimple</a>
 is used as follows:
 </p>
 <table summary=\"summary\" border=\"1\" cellspacing=0 cellpadding=2 style=\"border-collapse:collapse;\">

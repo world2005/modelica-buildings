@@ -37,8 +37,9 @@ block ReaderTMY3 "Reader for TMY3 weather data"
         iconTransformation(extent={{-242,24},{-202,64}})));
   //--------------------------------------------------------------
   // Total sky cover
-  parameter Buildings.BoundaryConditions.Types.DataSource totSkyCovSou=Buildings.BoundaryConditions.Types.DataSource.File
-    "Total sky cover" annotation (Evaluate=true, Dialog(group="Data source"));
+  parameter Buildings.BoundaryConditions.Types.DataSource totSkyCovSou=
+      Buildings.BoundaryConditions.Types.DataSource.File "Total sky cover"
+    annotation (Evaluate=true, Dialog(group="Data source"));
   parameter Real totSkyCov(
     min=0,
     max=1,
@@ -52,8 +53,9 @@ block ReaderTMY3 "Reader for TMY3 weather data"
     annotation (Placement(transformation(extent={{-240,-20},{-200,20}}),
         iconTransformation(extent={{-240,-20},{-200,20}})));
   // Opaque sky cover
-  parameter Buildings.BoundaryConditions.Types.DataSource opaSkyCovSou=Buildings.BoundaryConditions.Types.DataSource.File
-    "Opaque sky cover" annotation (Evaluate=true, Dialog(group="Data source"));
+  parameter Buildings.BoundaryConditions.Types.DataSource opaSkyCovSou=
+      Buildings.BoundaryConditions.Types.DataSource.File "Opaque sky cover"
+    annotation (Evaluate=true, Dialog(group="Data source"));
   parameter Real opaSkyCov(
     min=0,
     max=1,
@@ -141,7 +143,8 @@ block ReaderTMY3 "Reader for TMY3 weather data"
   //--------------------------------------------------------------
   // Infrared horizontal radiation
   parameter Buildings.BoundaryConditions.Types.DataSource HInfHorSou=Buildings.BoundaryConditions.Types.DataSource.File
-    "Infrared horizontal radiation" annotation (Evaluate=true, Dialog(group="Data source"));
+    "Infrared horizontal radiation"
+    annotation (Evaluate=true, Dialog(group="Data source"));
   parameter Modelica.SIunits.HeatFlux HInfHor=0.0
     "Infrared horizontal radiation (used if HInfHorSou=Parameter)"
     annotation (Evaluate=true, Dialog(group="Data source"));
