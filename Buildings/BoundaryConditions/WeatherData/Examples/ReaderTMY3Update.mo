@@ -1,15 +1,18 @@
 within Buildings.BoundaryConditions.WeatherData.Examples;
-model ReaderTMY3 "Test model for reading weather data"
+model ReaderTMY3Update "Test model for reading weather data"
+  import Buildings;
   extends Modelica.Icons.Example;
-  Buildings.BoundaryConditions.WeatherData.ReaderTMY3 weaDat(
+  Buildings.BoundaryConditions.WeatherData.ReaderTMY3Update
+                                                      weaDat(
     filNam="modelica://Buildings/Resources/weatherdata/USA_IL_Chicago-OHare.Intl.AP.725300_TMY3.mos")
     "Weather data reader"
     annotation (Placement(transformation(extent={{-20,40},{0,60}})));
-  Buildings.BoundaryConditions.WeatherData.ReaderTMY3 weaDatInpCon(filNam=
+  Buildings.BoundaryConditions.WeatherData.ReaderTMY3Update
+                                                      weaDatInpCon(filNam=
         "modelica://Buildings/Resources/weatherdata/USA_IL_Chicago-OHare.Intl.AP.725300_TMY3.mos",
       HSou=Buildings.BoundaryConditions.Types.RadiationDataSource.Input_HGloHor_HDifHor)
     "Weather data reader with radiation data obtained from input connector"
-    annotation (Placement(transformation(extent={{-20,-60},{0,-40}})));
+    annotation (Placement(transformation(extent={{-24,-54},{-4,-34}})));
   Modelica.Blocks.Sources.Constant HDifHor(k=0) "Diffuse horizontal radiation"
     annotation (Placement(transformation(extent={{-80,-60},{-60,-40}})));
   Modelica.Blocks.Sources.Constant HGloHor(k=0) "Horizontal global radiation"
@@ -17,12 +20,12 @@ model ReaderTMY3 "Test model for reading weather data"
 equation
   connect(HGloHor.y, weaDatInpCon.HGloHor_in)
                                          annotation (Line(
-      points={{-59,-10},{-28,-10},{-28,-55},{-21,-55}},
+      points={{-59,-10},{-28,-10},{-28,-52.6},{-25,-52.6}},
       color={0,0,127},
       smooth=Smooth.None));
   connect(HDifHor.y, weaDatInpCon.HDifHor_in)
                                          annotation (Line(
-      points={{-59,-50},{-40,-50},{-40,-57.6},{-21,-57.6}},
+      points={{-59,-50},{-40,-50},{-40,-51.6},{-25,-51.6}},
       color={0,0,127},
       smooth=Smooth.None));
   annotation (Diagram(graphics),
@@ -37,4 +40,4 @@ whereas the instance <code>weaDatInpCon</code> obtains the global horizontal and
 the diffuse horizontal solar radiation from its input connectors.
 </p>
 </html>"));
-end ReaderTMY3;
+end ReaderTMY3Update;
