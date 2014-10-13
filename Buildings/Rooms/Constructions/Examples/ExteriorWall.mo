@@ -15,7 +15,7 @@ model ExteriorWall "Test model for an exterior wall without a window"
 
   Buildings.Rooms.Constructions.Construction conExt[1](
     A=conPar[:].A,
-    layers=conPar[:].layers,
+    final layers=conPar[:].layers,
     til={Buildings.HeatTransfer.Types.Tilt.Wall})
     "Construction of an exterior wall without a window"
     annotation (Placement(transformation(extent={{0,-64},{60,-4}})));
