@@ -3,6 +3,8 @@ model MultiLayer
   "Model for heat conductance through a solid with multiple material layers"
   extends Buildings.HeatTransfer.Conduction.BaseClasses.PartialConductor(
    final R=RTot);
+  extends Buildings.HeatTransfer.Conduction.BaseClasses.StatePlacement;
+
   Modelica.SIunits.Temperature T[sum(nSta)](each nominal = 300)
     "Temperature at the states";
   Modelica.SIunits.HeatFlowRate Q_flow[sum(nSta)+nLay]
@@ -12,10 +14,13 @@ model MultiLayer
 protected
   Buildings.HeatTransfer.Conduction.SingleLayer[layers.nLay] lay(
    each final A=A,
-   material = {layers.material[i] for i in 1:layers.nLay},
+   final material = layers.material,
    T_a_start = _T_a_start,
    T_b_start = _T_b_start,
-   each steadyStateInitial = steadyStateInitial) "Material layer"
+   each steadyStateInitial = steadyStateInitial,
+   final placeStateAtPort_a = cat(1, {placeStateAtPort_a}, {false for i in 1:nLay-1}),
+   final placeStateAtPort_b = cat(1, {false for i in 1:nLay-1}, {placeStateAtPort_b}))
+    "Material layer"
     annotation (Placement(transformation(extent={{-20,-10},{0,10}})));
 
   final parameter Modelica.SIunits.Temperature _T_a_start[nLay](each fixed=false)
@@ -168,6 +173,10 @@ and the temperature state.
 </p>
 </html>", revisions="<html>
 <ul>
+<li>
+October 12, 2014, by Michael Wetter:<br/>
+Added option to place a state variable at the heat port.
+</li>
 <li>
 September 9, 2014, by Michael Wetter:<br/>
 Reverted change from March 1 2013 as this causes an error during model check

@@ -2,11 +2,14 @@ within Buildings.HeatTransfer.Conduction;
 model SingleLayer "Model for single layer heat conductance"
   extends Buildings.HeatTransfer.Conduction.BaseClasses.PartialConductor(
    final R=if (material.R == 0) then material.x/material.k/A else material.R/A);
+  extends Buildings.HeatTransfer.Conduction.BaseClasses.StatePlacement;
+
    // if material.R == 0, then the material specifies material.k, and this model specifies x
    // For resistances, material.k need not be specified, and hence we use material.R
   // The value T[:].start is used by the solver when finding initial states
   // that satisfy dT/dt=0, which requires solving a system of nonlinear equations
   // if the convection coefficient is a function of temperature.
+  // fixme: Update computation of T(start=..) and u(start=...)
   Modelica.SIunits.Temperature T[nSta](start=
      {T_a_start+(T_b_start-T_a_start) * UA *
         sum(1/(if (k==1 or k==nSta+1) then UAnSta2 else UAnSta) for k in 1:i) for i in 1:nSta},
@@ -18,7 +21,9 @@ model SingleLayer "Model for single layer heat conductance"
         sum(1/(if (k==1 or k==nSta+1) then UAnSta2 else UAnSta) for k in 1:i) for i in 1:nSta},
         each nominal = 270000)
     "Definition of specific internal energy (enthalpy in solids)!";
-  replaceable parameter Data.BaseClasses.Material material
+
+// fixme try to not use replaceable parameter Data.BaseClasses.Material material
+  parameter Data.BaseClasses.Material material
     "Material from Data.Solids, Data.SolidsPCM or Data.Resistances"
     annotation (choicesAllMatching=true, Placement(transformation(extent={{60,60},
             {80,80}})));
@@ -37,12 +42,20 @@ protected
   final parameter Integer nSta(min=1) = material.nSta
     "Number of state variables";
   final parameter Modelica.SIunits.ThermalConductance UAnSta = UA*nSta
-    "Thermal conductance between nodes";
+    "Thermal conductance between equally spaced nodes";
   final parameter Modelica.SIunits.ThermalConductance UAnSta2 = 2*UAnSta
     "Thermal conductance between nodes and surface boundary";
-  parameter Modelica.SIunits.Mass m = A*material.x*material.d/material.nSta
+
+  parameter Modelica.SIunits.ThermalResistance RNode(fixed=false)
+    "Thermal resistance between temperature nodes";
+  parameter Modelica.SIunits.ThermalResistance R_a(fixed=false)
+    "Thermal resistance between temperature node 1 and port_a";
+  parameter Modelica.SIunits.ThermalResistance R_b(fixed=false)
+    "Thermal resistance between temperature nodes nSta and port_b";
+
+  parameter Modelica.SIunits.Mass m[material.nSta](each fixed=false)
     "Mass associated with the temperature state";
-  parameter Modelica.SIunits.HeatCapacity C = m*material.c
+  parameter Modelica.SIunits.HeatCapacity C[material.nSta](each fixed=false)
     "Heat capacity associated with the temperature state";
 
   parameter Modelica.SIunits.SpecificInternalEnergy ud[Buildings.HeatTransfer.Conduction.nSupPCM](each fixed=false)
@@ -53,6 +66,48 @@ protected
     "Derivatives dT/du at the support points (used for PCM)";
 
 initial equation
+  if (placeStateAtPort_a == false and placeStateAtPort_b == false) then
+    // Example placement for nSta=3. Each dash is a resistance of equal magnitude
+    // T_a - T_1 -- T_2 -- T_3 - T_b
+    RNode = R/nSta;
+    R_a   = RNode/2;
+    R_b   = R_a;
+    m     = ones(nSta) * A*material.x*material.d/nSta;
+  elseif (placeStateAtPort_a == true and placeStateAtPort_b == true) then
+    // Example placement for nSta=3. Each dash is a resistance of equal magnitude,
+    // an equal sign means that the temperatures have the same value
+    // T_a = T_1 -- T_2 -- T_3 = T_b
+    RNode = R/(nSta-1);
+    R_a   = R/nSta/2;
+    R_b   = R_a;
+    for i in 1:nSta loop
+      m[i] = A*material.x*material.d/(nSta-1)/2 * (if (i==1 or i==nSta) then 1 else 2);
+    end for;
+  else
+    // Example placement for nSta=3. Each dash is a resistance of equal magnitude,
+    // an equal sign means that the temperatures have the same value
+    // T_a = T_1 -- T_2 -- T_3 - T_b   or  T_a - T_1 -- T_2 -- T_3 = T_b
+    RNode = R * 2/(2*nSta-1);
+    if placeStateAtPort_a then
+      R_a = 0;
+      R_b = R/(2*nSta-1);
+      for i in 1:nSta loop
+        m[i] = A*material.x*material.d/(2*nSta-1) * (if i==1 then 1 else 2);
+      end for;
+    else
+      R_a = R/(2*nSta-1);
+      R_b = 0;
+      for i in 1:nSta loop
+        m[i] = A*material.x*material.d/(2*nSta-1) * (if i==nSta then 1 else 2);
+      end for;
+    end if;
+  end if;
+  C = m*material.c;
+
+  // Verify computation of mass
+  if not material.steadyState then
+    assert(abs(sum(m)- A*material.x*material.d) < 1E-5, "Error in computation of mass");
+  end if;
   // The initialization is only done for materials that store energy.
     if not material.steadyState then
       if steadyStateInitial then
@@ -63,8 +118,7 @@ initial equation
         end if;
       else
         for i in 1:nSta loop
-          T[i] = T_a_start+(T_b_start-T_a_start) * UA *
-            sum(1/(if (k==1 or k==nSta+1) then UAnSta2 else UAnSta) for k in 1:i);
+          T[i] = T_a_start+(T_b_start-T_a_start)/R * (R_a + (i-1)*RNode);
         end for;
       end if;
     end if;
@@ -78,15 +132,27 @@ initial equation
      dT_du = zeros(Buildings.HeatTransfer.Conduction.nSupPCM);
    end if;
 equation
+    // Heat flow rates at port_a and port_b
     port_a.Q_flow = +Q_flow[1];
     port_b.Q_flow = -Q_flow[nSta+1];
 
-    port_a.T-T[1] = Q_flow[1]/UAnSta2;
-    T[nSta] -port_b.T = Q_flow[nSta+1]/UAnSta2;
+    // Temperatures at port_a and port_b
+    if placeStateAtPort_a then
+      port_a.T = T[1];
+    else
+      port_a.T = T[1] + Q_flow[1]*R_a;
+    end if;
 
+    if placeStateAtPort_b then
+      port_b.T = T[nSta];
+    else
+      port_b.T = T[nSta] - Q_flow[nSta+1]*R_b;
+    end if;
+
+    // Heat flow rates between the temperature states
     for i in 2:nSta loop
        // Q_flow[i] is heat flowing from (i-1) to (i)
-       T[i-1]-T[i] = Q_flow[i]/UAnSta;
+       Q_flow[i] = (T[i-1]-T[i])/RNode;
     end for;
 
     // Steady-state heat balance
@@ -110,7 +176,7 @@ equation
       if material.phasechange then
         // Phase change material
         for i in 1:nSta loop
-          der(u[i]) = (Q_flow[i]-Q_flow[i+1])/m;
+          der(u[i]) = (Q_flow[i]-Q_flow[i+1])/m[i];
           // Recalculation of temperature based on specific internal energy
           T[i]=Buildings.HeatTransfer.Conduction.BaseClasses.temperature_u(
                     ud=ud,
@@ -121,7 +187,7 @@ equation
       else
         // Regular material
         for i in 1:nSta loop
-          der(T[i]) = (Q_flow[i]-Q_flow[i+1])/C;
+          der(T[i]) = (Q_flow[i]-Q_flow[i+1])/C[i];
           u[i]=material.c*T[i];
         end for;
       end if;
@@ -263,6 +329,10 @@ Buildings.HeatTransfer.Conduction.MultiLayer</a> instead of this model.
 </html>",
 revisions="<html>
 <ul>
+<li>
+October 12, 2014, by Michael Wetter:<br/>
+Added option to place a state variable at the heat port.
+</li>
 <li>
 May 30, 2014, by Michael Wetter:<br/>
 Removed undesirable annotation <code>Evaluate=true</code>.
