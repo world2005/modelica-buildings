@@ -5,11 +5,11 @@ partial model DoorDiscretized
 
   parameter Integer nCom=10 "Number of compartments for the discretization";
 
-  parameter Modelica.SIunits.Pressure dp_turbulent(min=0) = 0.01
+  parameter Modelica.SIunits.PressureDifference dp_turbulent(min=0) = 0.01
     "Pressure difference where laminar and turbulent flow relation coincide. Recommended: 0.01";
   parameter Real CD=0.65 "|Orifice characteristics|Discharge coefficient";
 
-  Modelica.SIunits.Pressure dpAB[nCom](each nominal=1)
+  Modelica.SIunits.PressureDifference dpAB[nCom](each nominal=1)
     "Pressure difference between compartments";
   Modelica.SIunits.Velocity v[nCom](each nominal=0.01)
     "Velocity in compartment from A to B";
@@ -90,7 +90,7 @@ equation
 This is a partial model for the bi-directional air flow through a door.
 </p>
 <p>
-To compute the bi-directional flow, 
+To compute the bi-directional flow,
 the door is discretize along the height coordinate, and uses
 an orifice equation to compute the flow for each compartment.
 </p>
@@ -101,6 +101,12 @@ using the model for a door that can be open or closed.
 </html>",
 revisions="<html>
 <ul>
+<li>
+January 22, 2016, by Michael Wetter:<br/>
+Corrected type declaration of pressure difference.
+This is
+for <a href=\"https://github.com/iea-annex60/modelica-annex60/issues/404\">#404</a>.
+</li>
 <li>
 September 26, 2013 by Michael Wetter:<br/>
 Added missing <code>each</code> keyword.
@@ -113,7 +119,7 @@ Renamed protected parameters for consistency with the naming conventions.
        Removed protected variable <code>rhoAve</code>.
 </li>
 <li><i>August 12, 2011</i> by Michael Wetter:<br/>
-       Changed model to use the new function 
+       Changed model to use the new function
        <a href=\"modelica://Buildings.Airflow.Multizone.BaseClasses.powerLawFixedM\">
        Buildings.Airflow.Multizone.BaseClasses.powerLawFixedM</a>.
 </li>

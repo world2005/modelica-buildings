@@ -11,19 +11,19 @@ partial model TwoWayFlowElementBuoyancy
   parameter Modelica.SIunits.Length hB=2.7/2
     "|Geometry|Height of reference pressure zone B";
 
-  annotation (Diagram(graphics),
-                       Icon(graphics),
-Documentation(info="<html>
+  annotation (Documentation(info="<html>
 <p>
 This is a partial model for models that describe the bi-directional
 air flow through large openings.
-<P>
-Models that extend this model need to compute 
+</p>
+<p>
+Models that extend this model need to compute
 <code>mAB_flow</code> and <code>mBA_flow</code>,
 or alternatively <code>VAB_flow</code> and <code>VBA_flow</code>,
 and the face area <code>area</code>.
 The face area is a variable to allow this partial model to be used
 for doors that can be open or closed as a function of an input signal.
+</p>
 </html>",
 revisions="<html>
 <ul>

@@ -16,7 +16,7 @@ protected
       T2/T1);
   constant Real a2(unit="1/K")=(Modelica.Math.log(p1) - a1)/T1;
 algorithm
-  dT := dp_w / a2 / p_w;
+  dT := dp_w / (a2*p_w);
 
   annotation (
     Documentation(info="<html>
@@ -36,9 +36,5 @@ May 21, 2010 by Michael Wetter:<br/>
 First implementation.
 </li>
 </ul>
-</html>"),
-    Icon(coordinateSystem(preserveAspectRatio=false, extent={{-100,-100},{100,
-            100}}), graphics),
-    Diagram(coordinateSystem(preserveAspectRatio=true, extent={{-100,-100},{100,
-            100}}), graphics));
+</html>"));
 end der_TDewPoi_pW_amb;

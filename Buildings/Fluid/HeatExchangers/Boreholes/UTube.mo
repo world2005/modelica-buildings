@@ -190,17 +190,12 @@ equation
           lineColor={0,0,0},
           fillColor={192,192,192},
           fillPattern=FillPattern.Backward)}),
-    Diagram(coordinateSystem(
-        preserveAspectRatio=true,
-        extent={{-100,-100},{100,100}},
-        grid={2,2},
-        initialScale=0.5)),
     Documentation(info="<html>
 <p>
-Model of a single U-tube borehole heat exchanger. 
+Model of a single U-tube borehole heat exchanger.
 The borehole heat exchanger is vertically discretized into <i>n<sub>seg</sub></i>
 elements of height <i>h=h<sub>Bor</sub>&frasl;n<sub>seg</sub></i>.
-Each segment contains a model for the heat transfer in the borehole, 
+Each segment contains a model for the heat transfer in the borehole,
 for heat transfer in the soil and for the far-field boundary condition.
 </p>
 <p>
@@ -213,15 +208,13 @@ to Bauer et al., (2011).
 </p>
 <p>
 The heat transfer in the soil is computed using transient heat conduction in cylindrical
-coordinates for the spatial domain <i>r<sub>bor</sub> &le; r &le; r<sub>ext</sub></i>. 
-In the radial direction, the spatial domain is discretized into 
+coordinates for the spatial domain <i>r<sub>bor</sub> &le; r &le; r<sub>ext</sub></i>.
+In the radial direction, the spatial domain is discretized into
 <i>n<sub>hor</sub></i> segments with uniform material properties.
 Thermal properties can be specified separately for each horizontal layer.
-The vertical heat flow is assumed to be zero, and there is assumed to be 
-no ground water flow. 
 </p>
 <p>
-The far-field temperature, i.e., the temperature at the radius 
+The far-field temperature, i.e., the temperature at the radius
 <i>r<sub>ext</sub></i>, is computed using a power-series solution
 to a line-source heat transfer problem. This temperature boundary condition
 is updated every <i>t<sub>sample</sub></i> seconds.
@@ -229,10 +222,10 @@ is updated every <i>t<sub>sample</sub></i> seconds.
 <p>
 The initial far-field temperature <i>T<sub>ext,start</sub></i>, which
 is the temperature of the soil at a radius <i>r<sub>ext</sub></i>,
-is computed 
-as a function of the depth <i>z &gt; 0</i>. 
+is computed
+as a function of the depth <i>z &gt; 0</i>.
 For a depth between <i>0 &le; z &le; z<sub>0</sub></i>, the temperature
-is set to <i>T<sub>ext,0,start</sub></i>. 
+is set to <i>T<sub>ext,0,start</sub></i>.
 The value of <i>z<sub>0</sub></i> is a parameter with a default of 10 meters.
 However, there is large variability in the depth where the undisturbed soil temperature
 starts.
@@ -245,14 +238,22 @@ the temperature is computed as
 <p>
 with <i>i &isin; {1, ..., n<sub>ver</sub>}</i>,
 where the temperature gradient <i>dT &frasl; dz &ge; 0</i> is a parameter.
-As with <i>z<sub>0</sub></i>, there is large variability in 
+As with <i>z<sub>0</sub></i>, there is large variability in
 <i>dT &frasl; dz &ge; 0</i>. The default value is set to <i>1</i> Kelvin per 100 meters.
 For the temperature of the grout, the same equations are applied, with
 <i>T<sub>ext,0,start</sub></i> replaced with
-<i>T<sub>fil,0,start</sub></i>, and 
+<i>T<sub>fil,0,start</sub></i>, and
 <i>T<sup>i</sup><sub>ext,start</sub></i> replaced with
-<i>T<sup>i</sup><sub>fil,start</sub></i>. 
+<i>T<sup>i</sup><sub>fil,start</sub></i>.
 The default setting uses the same temperature for the soil and the filling material.
+</p>
+<h4>Assumptions and limitations</h4>
+<p>
+The vertical heat flow is assumed to be zero and hence there is no heat flow from
+the ground surface to the soil that could be used to regenerate the soil temperature.
+</p>
+<p>
+There is no ground water flow.
 </p>
 <h4>Implementation</h4>
 <p>
@@ -287,6 +288,10 @@ International Journal Of Energy Research, 35:312&ndash;320, 2011.
 </p>
 </html>", revisions="<html>
 <ul>
+<li>
+December 23, 2015, by Michael Wetter:<br/>
+Updated documentation and added section about model assumptions and limitations.
+</li>
 <li>
 October 8, 2013, by Michael Wetter:<br/>
 Removed parameter <code>show_V_flow</code>.

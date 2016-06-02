@@ -1,15 +1,12 @@
 within Buildings.Fluid.Boilers.Examples;
 model BoilerPolynomialClosedLoop "Boiler with closed loop control"
   extends Modelica.Icons.Example;
- package Medium = Buildings.Media.ConstantPropertyLiquidWater "Medium model";
+ package Medium = Buildings.Media.Water "Medium model";
  parameter Modelica.SIunits.Power Q_flow_nominal = 20000 "Nominal power";
  parameter Modelica.SIunits.Temperature dT_nominal = 20
     "Nominal temperature difference";
  parameter Modelica.SIunits.MassFlowRate m_flow_nominal = Q_flow_nominal/dT_nominal/4200
     "Nominal mass flow rate";
-
-  inner Modelica.Fluid.System system
-    annotation (Placement(transformation(extent={{-120,-140},{-100,-120}})));
 
   Buildings.Fluid.Boilers.BoilerPolynomial boi(
     a={0.9},
@@ -27,26 +24,28 @@ model BoilerPolynomialClosedLoop "Boiler with closed loop control"
   Modelica.Blocks.Math.BooleanToReal booleanToReal
     annotation (Placement(transformation(extent={{-92,-80},{-72,-60}})));
   Actuators.Valves.ThreeWayEqualPercentageLinear val(
-                          redeclare package Medium = Medium,
+    redeclare package Medium = Medium,
     l={0.01,0.01},
-    dynamicBalance=false,
     m_flow_nominal=m_flow_nominal,
-    dpValve_nominal=6000)                            annotation (Placement(
-        transformation(
+    dpValve_nominal=6000,
+    energyDynamics=Modelica.Fluid.Types.Dynamics.SteadyState) annotation (
+      Placement(transformation(
         extent={{-10,-10},{10,10}},
         rotation=90,
         origin={0,40})));
-  Movers.FlowMachine_m_flow pumLoa(redeclare package Medium = Medium,
-    dynamicBalance=false,
-    m_flow_nominal=2*m_flow_nominal) "Pump for heating load"
-                                annotation (Placement(transformation(
+  Movers.FlowControlled_m_flow pumLoa(
+    redeclare package Medium = Medium,
+    m_flow_nominal=2*m_flow_nominal,
+    energyDynamics=Modelica.Fluid.Types.Dynamics.SteadyState)
+    "Pump for heating load" annotation (Placement(transformation(
         extent={{-10,-10},{10,10}},
         rotation=90,
         origin={0,110})));
-  Movers.FlowMachine_m_flow pumBoi(redeclare package Medium = Medium,
-      m_flow_nominal=m_flow_nominal,
-    dynamicBalance=false) "Pump for boiler loop"
-                                annotation (Placement(transformation(
+  Movers.FlowControlled_m_flow pumBoi(
+    redeclare package Medium = Medium,
+    m_flow_nominal=m_flow_nominal,
+    energyDynamics=Modelica.Fluid.Types.Dynamics.SteadyState)
+    "Pump for boiler loop" annotation (Placement(transformation(
         extent={{-10,-10},{10,10}},
         rotation=90,
         origin={0,-20})));
@@ -67,17 +66,19 @@ model BoilerPolynomialClosedLoop "Boiler with closed loop control"
     annotation (Placement(transformation(extent={{-120,30},{-100,50}})));
   FixedResistances.SplitterFixedResistanceDpM spl(
     redeclare package Medium = Medium,
-    dynamicBalance=false,
     m_flow_nominal=m_flow_nominal*{1,2,1},
-    dp_nominal={0,0,200}) "Splitter/mixer" annotation (Placement(transformation(
+    dp_nominal={0,0,200},
+    energyDynamics=Modelica.Fluid.Types.Dynamics.SteadyState) "Splitter/mixer"
+    annotation (Placement(transformation(
         extent={{-10,-10},{10,10}},
         rotation=90,
         origin={0,70})));
   FixedResistances.SplitterFixedResistanceDpM spl1(
     redeclare package Medium = Medium,
     m_flow_nominal=m_flow_nominal*{1,1,1},
-    dynamicBalance=false,
-    dp_nominal={0,0,100}) "Splitter/mixer" annotation (Placement(transformation(
+    dp_nominal={0,0,100},
+    energyDynamics=Modelica.Fluid.Types.Dynamics.SteadyState) "Splitter/mixer"
+    annotation (Placement(transformation(
         extent={{-10,-10},{10,10}},
         rotation=90,
         origin={0,10})));
@@ -85,16 +86,17 @@ model BoilerPolynomialClosedLoop "Boiler with closed loop control"
     redeclare package Medium = Medium,
     m_flow_nominal=m_flow_nominal*{1,1,1},
     dp_nominal=0*{1,1,1},
-    dynamicBalance=false) "Splitter/mixer" annotation (Placement(transformation(
+    energyDynamics=Modelica.Fluid.Types.Dynamics.SteadyState) "Splitter/mixer"
+    annotation (Placement(transformation(
         extent={{-10,-10},{10,10}},
         rotation=270,
         origin={80,10})));
   FixedResistances.SplitterFixedResistanceDpM spl3(
     redeclare package Medium = Medium,
     dp_nominal=0*{1,1,1},
-    dynamicBalance=false,
-    m_flow_nominal=m_flow_nominal*{2,1,1}) "Splitter/mixer"
-                                           annotation (Placement(transformation(
+    m_flow_nominal=m_flow_nominal*{2,1,1},
+    energyDynamics=Modelica.Fluid.Types.Dynamics.SteadyState) "Splitter/mixer"
+    annotation (Placement(transformation(
         extent={{-10,-10},{10,10}},
         rotation=270,
         origin={80,70})));
@@ -104,7 +106,8 @@ model BoilerPolynomialClosedLoop "Boiler with closed loop control"
     redeclare package Medium = Medium,
     m_flow_nominal=m_flow_nominal*{1,1,1},
     dp_nominal=0*{1,1,1},
-    dynamicBalance=false) "Splitter/mixer" annotation (Placement(transformation(
+    energyDynamics=Modelica.Fluid.Types.Dynamics.SteadyState) "Splitter/mixer"
+    annotation (Placement(transformation(
         extent={{-10,-10},{10,10}},
         rotation=270,
         origin={80,40})));
@@ -238,36 +241,46 @@ equation
       color={0,127,255},
       smooth=Smooth.None));
   connect(spl1.port_3, spl2.port_3) annotation (Line(
-      points={{10,10},{40,10},{40,10},{70,10}},
+      points={{10,10},{70,10}},
       color={0,127,255},
       smooth=Smooth.None));
   annotation (Diagram(coordinateSystem(preserveAspectRatio=true, extent={{-200,-200},
-            {200,200}}),       graphics),
+            {200,200}})),
              __Dymola_Commands(file="modelica://Buildings/Resources/Scripts/Dymola/Fluid/Boilers/Examples/BoilerPolynomialClosedLoop.mos"
         "Simulate and plot"),
     experiment(
       StopTime=14400,
       Tolerance=1e-05),
-    Icon(coordinateSystem(preserveAspectRatio=true, extent={{-100,-100},{100,
-            100}})),
     Documentation(info="<html>
 <p>
 This model illustrates how to use a boiler model
-with closed loop control. 
+with closed loop control.
 The controller modulates the boiler temperature between
 60&deg;C and 80&deg;C.
 A three-way valve mixes recirculated water with boiler water
 to regulate the temperature of the volume at a constant temperature
 of 40&deg;C.
-There is also a bypass in the boiler loop to ensure circulation when the 
+There is also a bypass in the boiler loop to ensure circulation when the
 valve position is such that it only recirculates water from the load.
 The bypass between valve and pump mixes recirculated water, thereby
 allowing the valve to work over a larger operating range.
 The expansion vessel near the boiler is used to set a reference pressure,
-and it is used to accomodate for the thermal expansion of the water.
+and it is used to accommodate for the thermal expansion of the water.
 </p>
 </html>", revisions="<html>
 <ul>
+<li>
+March 1, 2016, by Michael Wetter:<br/>
+Removed parameter <code>dynamicBalance</code>.
+This is for
+<a href=\"https://github.com/lbl-srg/modelica-buildings/issues/484\">#484</a>.
+</li>
+<li>
+December 22, 2014 by Michael Wetter:<br/>
+Removed <code>Modelica.Fluid.System</code>
+to address issue
+<a href=\"https://github.com/lbl-srg/modelica-buildings/issues/311\">#311</a>.
+</li>
 <li>
 October 6, 2014, by Michael Wetter:<br/>
 Corrected wrong value of <code>m_flow_nominal</code> for <code>spl3</code>.

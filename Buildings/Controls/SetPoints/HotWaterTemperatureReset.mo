@@ -25,8 +25,7 @@ block HotWaterTemperatureReset
   Modelica.Blocks.Interfaces.RealInput TRoo_in(final quantity="ThermodynamicTemperature",
                                                final unit = "K", displayUnit = "degC", min=0) if
           use_TRoo_in "Room air temperature set point"
-    annotation (Placement(transformation(extent={{-139,-80},{-99,-40}},
-          rotation=0)));
+    annotation (Placement(transformation(extent={{-139,-80},{-99,-40}})));
 
   Modelica.Blocks.Interfaces.RealInput TOut(final quantity="ThermodynamicTemperature",
                                             final unit = "K", displayUnit = "degC", min=0)
@@ -74,13 +73,13 @@ by a parameter, or it can be an input to the model. The latter allows
 to use this model with systems that have night set back.
 </p>
 <p>
-The parameter <code>dTOutHeaBal</code> can be used to shift the heating curve 
-to take into account that heat gains from solar, equipment and people 
-make up for some of the transmission losses. 
+The parameter <code>dTOutHeaBal</code> can be used to shift the heating curve
+to take into account that heat gains from solar, equipment and people
+make up for some of the transmission losses.
 For example, in energy efficient houses, the heating may not be switched on if
 the outside air temperature is greater than
 <i>12</i>&deg;C, even if a room temperature of <i>20</i>&deg;C is required.
-In such a situation, set <code>dTOutHeaBal=20-12=8</code> Kelvin to 
+In such a situation, set <code>dTOutHeaBal=20-12=8</code> Kelvin to
 shift the heating curve.
 </p>
 </html>", revisions="<html>
@@ -118,16 +117,12 @@ First implementation.
           fillColor={192,192,192},
           fillPattern=FillPattern.Solid),
         Line(
-          points={{-80,-82},{60,32}},
-          color={0,0,0},
-          smooth=Smooth.None),
+          points={{-80,-82},{60,32}}),
         Line(
           points={{-80,-82},{-42,-38},{4,2},{60,32}},
-          color={0,0,0},
           smooth=Smooth.Bezier),
         Line(
           points={{-80,-82},{-58,-42},{-4,8},{60,32}},
-          color={0,0,0},
           smooth=Smooth.Bezier),
         Text(
           extent={{-152,120},{-102,70}},
@@ -145,7 +140,5 @@ First implementation.
         Text(
           extent={{42,-30},{92,-80}},
           lineColor={0,0,127},
-          textString="TRet")}),
-              Diagram(coordinateSystem(preserveAspectRatio=true, extent={{-100,
-            -100},{100,100}})));
+          textString="TRet")}));
 end HotWaterTemperatureReset;

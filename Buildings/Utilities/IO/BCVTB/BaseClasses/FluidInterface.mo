@@ -8,13 +8,11 @@ partial model FluidInterface
      annotation (choicesAllMatching=true);
 
   parameter Integer nPorts=0 "Number of ports" annotation(Dialog(connectorSizing=true));
-  Modelica.Blocks.Interfaces.RealInput m_flow_in if     use_m_flow_in
+  Modelica.Blocks.Interfaces.RealInput m_flow_in if use_m_flow_in
     "Prescribed mass flow rate"
-    annotation (Placement(transformation(extent={{-120,60},{-80,100}},
-          rotation=0), iconTransformation(extent={{-120,60},{-80,100}})));
+    annotation (Placement(transformation(extent={{-120,60},{-80,100}}), iconTransformation(extent={{-120,60},{-80,100}})));
   Modelica.Blocks.Interfaces.RealInput T_in "Prescribed boundary temperature"
-    annotation (Placement(transformation(extent={{-140,40},{-100,80}},
-          rotation=0)));
+    annotation (Placement(transformation(extent={{-140,40},{-100,80}})));
 
    parameter Boolean use_m_flow_in = false
     "Get the mass flow rate from the input connector"
@@ -57,19 +55,30 @@ partial model FluidInterface
     use_X_in=false,
     use_C_in=false,
     final use_m_flow_in=true)
-    annotation (Placement(transformation(extent={{-60,-10},{-40,10}})));
+    annotation (Placement(transformation(extent={{-52,-10},{-32,10}})));
 protected
   parameter Modelica.Fluid.Types.PortFlowDirection flowDirection=
                    Modelica.Fluid.Types.PortFlowDirection.Bidirectional
-    "Allowed flow direction"               annotation(Evaluate=true, Dialog(tab="Advanced"));
+    "Allowed flow direction"
+    annotation(Evaluate=true, Dialog(tab="Advanced"));
+
+  Modelica.Blocks.Sources.Constant m_flow_par(final k=m_flow)
+    "Mass flow rate if set as a parameter"
+    annotation (Placement(transformation(extent={{-88,-30},{-68,-10}})));
 equation
-  connect(m_flow_in, bou.m_flow_in);
-  if not use_m_flow_in then
-    bou.m_flow_in = m_flow;
+  if use_m_flow_in then
+    connect(m_flow_in, bou.m_flow_in) annotation (Line(points={{-100,80},{-86,80},
+            {-74,80},{-74,8},{-52,8}},
+                                     color={0,0,127}));
+
+  else
+    connect(m_flow_par.y, bou.m_flow_in) annotation (Line(points={{-67,-20},{
+            -60,-20},{-60,8},{-52,8}},
+                                color={0,0,127}));
   end if;
 
   connect(totEntFloRat.port_b, bou.ports) annotation (Line(
-      points={{-20,0},{-40,0}},
+      points={{-20,0},{-32,0}},
       color={0,127,255},
       smooth=Smooth.None));
   connect(sumHTot_flow.u, totEntFloRat.H_flow)
@@ -78,12 +87,11 @@ equation
       color={0,0,127},
       smooth=Smooth.None));
   connect(bou.T_in, T_in) annotation (Line(
-      points={{-62,4},{-80,4},{-80,60},{-120,60}},
+      points={{-54,4},{-80,4},{-80,60},{-120,60}},
       color={0,0,127},
       smooth=Smooth.None));
+
   annotation (defaultComponentName="bouBCVTB",
-              Diagram(coordinateSystem(preserveAspectRatio=true, extent={{-100,
-            -100},{100,100}})),
     Icon(coordinateSystem(preserveAspectRatio=false, extent={{-100,-100},{100,
             100}}), graphics={
         Line(points={{-100,40},{-92,40}}, color={0,0,255}),
@@ -129,6 +137,11 @@ interfacing fluid flow systems with the BCVTB interface.
 </html>",
 revisions="<html>
 <ul>
+<li>
+May 27, 2016, by Michael Wetter:<br/>
+Refactored mass flow rate assignment to avoid using conditional connector
+in a variable assignment.
+</li>
 <li>
 May 30, 2014, by Michael Wetter:<br/>
 Removed undesirable annotation <code>Evaluate=true</code>.

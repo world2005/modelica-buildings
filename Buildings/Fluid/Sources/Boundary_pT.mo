@@ -14,45 +14,49 @@ model Boundary_pT
   parameter Boolean use_C_in = false
     "Get the trace substances from the input connector"
     annotation(Evaluate=true, HideResult=true);
+
   parameter Medium.AbsolutePressure p = Medium.p_default
     "Fixed value of pressure"
     annotation (Dialog(enable = not use_p_in));
   parameter Medium.Temperature T = Medium.T_default
     "Fixed value of temperature"
     annotation (Dialog(enable = not use_T_in));
-  parameter Medium.MassFraction X[Medium.nX] = Medium.X_default
+  parameter Medium.MassFraction X[Medium.nX](
+    final quantity=Medium.substanceNames) = Medium.X_default
     "Fixed value of composition"
     annotation (Dialog(enable = (not use_X_in) and Medium.nXi > 0));
   parameter Medium.ExtraProperty C[Medium.nC](
-       quantity=Medium.extraPropertiesNames)=fill(0, Medium.nC)
+    final quantity=Medium.extraPropertiesNames) = fill(0, Medium.nC)
     "Fixed values of trace substances"
     annotation (Dialog(enable = (not use_C_in) and Medium.nC > 0));
-  Modelica.Blocks.Interfaces.RealInput p_in if              use_p_in
+  Modelica.Blocks.Interfaces.RealInput p_in(final unit="Pa") if use_p_in
     "Prescribed boundary pressure"
-    annotation (Placement(transformation(extent={{-140,60},{-100,100}},
-          rotation=0)));
-  Modelica.Blocks.Interfaces.RealInput T_in if         use_T_in
+    annotation (Placement(transformation(extent={{-140,60},{-100,100}})));
+  Modelica.Blocks.Interfaces.RealInput T_in(final unit="K",
+                                            displayUnit="degC") if use_T_in
     "Prescribed boundary temperature"
-    annotation (Placement(transformation(extent={{-140,20},{-100,60}},
-          rotation=0)));
-  Modelica.Blocks.Interfaces.RealInput X_in[Medium.nX] if
-                                                        use_X_in
+    annotation (Placement(transformation(extent={{-140,20},{-100,60}})));
+  Modelica.Blocks.Interfaces.RealInput X_in[Medium.nX](
+    each final unit = "kg/kg",
+    final quantity=Medium.substanceNames) if use_X_in
     "Prescribed boundary composition"
-    annotation (Placement(transformation(extent={{-140,-60},{-100,-20}},
-          rotation=0)));
-  Modelica.Blocks.Interfaces.RealInput C_in[Medium.nC] if
-                                                        use_C_in
+    annotation (Placement(transformation(extent={{-140,-60},{-100,-20}})));
+  Modelica.Blocks.Interfaces.RealInput C_in[Medium.nC](
+    final quantity=Medium.extraPropertiesNames) if use_C_in
     "Prescribed boundary trace substances"
-    annotation (Placement(transformation(extent={{-140,-100},{-100,-60}},
-          rotation=0)));
+    annotation (Placement(transformation(extent={{-140,-100},{-100,-60}})));
 protected
-  Modelica.Blocks.Interfaces.RealInput p_in_internal
+  Modelica.Blocks.Interfaces.RealInput p_in_internal(final unit="Pa")
     "Needed to connect to conditional connector";
-  Modelica.Blocks.Interfaces.RealInput T_in_internal
+  Modelica.Blocks.Interfaces.RealInput T_in_internal(final unit="K",
+                                                     displayUnit="degC")
     "Needed to connect to conditional connector";
-  Modelica.Blocks.Interfaces.RealInput X_in_internal[Medium.nX]
+  Modelica.Blocks.Interfaces.RealInput X_in_internal[Medium.nX](
+    each final unit = "kg/kg",
+    final quantity=Medium.substanceNames)
     "Needed to connect to conditional connector";
-  Modelica.Blocks.Interfaces.RealInput C_in_internal[Medium.nC]
+  Modelica.Blocks.Interfaces.RealInput C_in_internal[Medium.nC](
+    final quantity=Medium.extraPropertiesNames)
     "Needed to connect to conditional connector";
 equation
   Modelica.Fluid.Utilities.checkBoundary(Medium.mediumName, Medium.substanceNames,
@@ -145,7 +149,7 @@ Defines prescribed values for boundary conditions:
 <li> Boundary composition (only for multi-substance or trace-substance flow).</li>
 </ul>
 <p>If <code>use_p_in</code> is false (default option), the <code>p</code> parameter
-is used as boundary pressure, and the <code>p_in</code> input connector is disabled; if <code>use_p_in</code> is true, then the <code>p</code> parameter is ignored, and the value provided by the input connector is used instead.</p> 
+is used as boundary pressure, and the <code>p_in</code> input connector is disabled; if <code>use_p_in</code> is true, then the <code>p</code> parameter is ignored, and the value provided by the input connector is used instead.</p>
 <p>The same applies to the temperature, composition and trace substances.</p>
 <p>
 Note, that boundary temperature,
@@ -158,6 +162,10 @@ with exception of boundary pressure, do not have an effect.
 revisions="<html>
 <ul>
 <li>
+January 26, 2016, by Michael Wetter:<br/>
+Added <code>unit</code> and <code>quantity</code> attributes.
+</li>
+<li>
 May 29, 2014, by Michael Wetter:<br/>
 Removed undesirable annotation <code>Evaluate=true</code>.
 </li>
@@ -167,9 +175,5 @@ First implementation.
 Implementation is based on <code>Modelica.Fluid</code>.
 </li>
 </ul>
-</html>"),
-    Diagram(coordinateSystem(
-        preserveAspectRatio=false,
-        extent={{-100,-100},{100,100}},
-        grid={2,2})));
+</html>"));
 end Boundary_pT;

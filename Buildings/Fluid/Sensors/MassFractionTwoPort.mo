@@ -13,7 +13,7 @@ model MassFractionTwoPort "Ideal two port mass fraction sensor"
   Modelica.Blocks.Interfaces.RealOutput X(min=-1e-3,
                                           max=1.001,
                                           start=X_start,
-                                          unit="1")
+                                          final unit="kg/kg")
     "Mass fraction of the passing fluid"
     annotation (Placement(transformation(
         origin={0,110},
@@ -24,8 +24,8 @@ protected
   Medium.MassFraction XMed(start=X_start)
     "Mass fraction to which the sensor is exposed";
   Medium.MassFraction XiVec[Medium.nXi](
-      quantity=Medium.extraPropertiesNames)
-    "Trace substances vector, needed because indexed argument for the operator inStream is not supported";
+    final quantity=Medium.substanceNames[1:Medium.nXi])
+    "Mass fraction vector, needed because indexed argument for the operator inStream is not supported";
 initial equation
   // Assign initial conditions
   if dynamic then
@@ -49,15 +49,11 @@ equation
   XMed = if i_x > Medium.nXi then (1-sum(XiVec)) else XiVec[i_x];
   // Output signal of sensor
   if dynamic then
-    der(X)  = (XMed-X)*k/tau;
+    der(X)  = (XMed-X)*k*tauInv;
   else
     X = XMed;
   end if;
 annotation (defaultComponentName="senMasFra",
-  Diagram(coordinateSystem(preserveAspectRatio=true,  extent={{-100,-100},{
-            100,100}},
-        grid={1,1}),
-          graphics),
   Icon(coordinateSystem(preserveAspectRatio=false, extent={{-100,-100},{100,100}},
         grid={1,1}), graphics={
         Text(
@@ -69,10 +65,10 @@ annotation (defaultComponentName="senMasFra",
         Line(points={{70,0},{100,0}}, color={0,128,255})}),
   Documentation(info="<html>
 <p>
-This model outputs the mass fraction of the passing fluid. 
+This model outputs the mass fraction of the passing fluid.
 The sensor is ideal, i.e. it does not influence the fluid.
 If the parameter <code>tau</code> is non-zero, then its output
-is computed using a first order differential equation. 
+is computed using a first order differential equation.
 Setting <code>tau=0</code> is <i>not</i> recommend. See
 <a href=\"modelica://Buildings.Fluid.Sensors.UsersGuide\">
 Buildings.Fluid.Sensors.UsersGuide</a> for an explanation.
@@ -80,6 +76,23 @@ Buildings.Fluid.Sensors.UsersGuide</a> for an explanation.
 </html>",
 revisions="<html>
 <ul>
+<li>
+January 26, 2016, by Michael Wetter:<br/>
+Corrected wrong assignment
+<code>XiVec[Medium.nXi](quantity=Medium.extraPropertiesNames)</code>
+to
+<code>XiVec[Medium.nXi](quantity=Medium.substanceNames[1:Medium.nXi])</code>.<br/>
+Changed unit of output signal from <code>1</code> to <code>kg/kg</code>
+to indicate that it is a mass fraction, and declared the assignment final.
+</li>
+<li>
+January 18, 2016 by Filip Jorissen:<br/>
+Using parameter <code>tauInv</code>
+since this now exists in
+<a href=\"modelica://Buildings.Fluid.Sensors.BaseClasses.PartialDynamicFlowSensor\">Buildings.Fluid.Sensors.BaseClasses.PartialDynamicFlowSensor</a>.
+This is for
+<a href=\"https://github.com/iea-annex60/modelica-annex60/issues/372\">#372</a>.
+</li>
 <li>
 September 10, 2013, by Michael Wetter:<br/>
 Changed <code>min</code> and <code>max</code> values for
@@ -97,13 +110,13 @@ Buildings.Fluid.BaseClasses.IndexMassFraction</a>.
 </li>
 <li>
 November 3, 2011, by Michael Wetter:<br/>
-Moved <code>der(X) := 0;</code> from the initial algorithm section to 
+Moved <code>der(X) := 0;</code> from the initial algorithm section to
 the initial equation section
 as this assignment does not conform to the Modelica specification.
 </li>
 <li>
 June 3, 2011 by Michael Wetter:<br/>
-Revised implementation to add dynamics in such a way that 
+Revised implementation to add dynamics in such a way that
 the time constant increases as the mass flow rate tends to zero.
 This significantly improves the numerics.
 </li>

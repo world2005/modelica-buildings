@@ -42,7 +42,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = u'Modelica Buildings library'
-copyright = u'2012-2013, The Regents of the University of California (through Lawrence Berkeley National Laboratory)'
+copyright = u'2012-2015, The Regents of the University of California (through Lawrence Berkeley National Laboratory)'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
@@ -164,6 +164,9 @@ html_show_sourcelink = True
 # Output file base name for HTML help builder.
 htmlhelp_basename = 'Documentation'
 
+
+# Number figures in html output
+numfig = True
 
 # -- Options for LaTeX output --------------------------------------------------
 

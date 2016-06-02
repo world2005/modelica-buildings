@@ -59,14 +59,11 @@ equation
   TMedWetBul = wetBulMod.TWetBul;
   // Output signal of sensor
   if dynamic then
-    der(T) = (TMedWetBul-T)*k/tau;
+    der(T) = (TMedWetBul-T)*k*tauInv;
   else
     T = TMedWetBul;
   end if;
 annotation (defaultComponentName="senWetBul",
-  Diagram(coordinateSystem(preserveAspectRatio=false, extent={{-100,-100},{100,
-            100}}),
-          graphics),
     Icon(graphics={
         Line(points={{-100,0},{92,0}}, color={0,128,255}),
         Ellipse(
@@ -75,9 +72,9 @@ annotation (defaultComponentName="senWetBul",
           lineThickness=0.5,
           fillColor={0,0,255},
           fillPattern=FillPattern.Solid),
-        Line(points={{-40,60},{-12,60}}, color={0,0,0}),
-        Line(points={{-40,30},{-12,30}}, color={0,0,0}),
-        Line(points={{-40,0},{-12,0}}, color={0,0,0}),
+        Line(points={{-40,60},{-12,60}}),
+        Line(points={{-40,30},{-12,30}}),
+        Line(points={{-40,0},{-12,0}}),
         Rectangle(
           extent={{-12,60},{12,-24}},
           lineColor={0,0,255},
@@ -94,11 +91,9 @@ annotation (defaultComponentName="senWetBul",
           textString="T"),
         Line(
           points={{-12,60},{-12,-25}},
-          color={0,0,0},
           thickness=0.5),
         Line(
           points={{12,60},{12,-24}},
-          color={0,0,0},
           thickness=0.5),
         Line(points={{0,100},{0,50}}, color={0,0,127})}),
     Documentation(info="<html>
@@ -106,7 +101,7 @@ annotation (defaultComponentName="senWetBul",
 This sensor outputs the wet bulb temperature of the medium in the flow
 between its fluid ports. The sensor is ideal, i.e., it does not influence the fluid.
 If the parameter <code>tau</code> is non-zero, then its output
-is computed using a first order differential equation. 
+is computed using a first order differential equation.
 Setting <code>tau=0</code> is <i>not</i> recommend. See
 <a href=\"modelica://Buildings.Fluid.Sensors.UsersGuide\">
 Buildings.Fluid.Sensors.UsersGuide</a> for an explanation.
@@ -115,13 +110,21 @@ Buildings.Fluid.Sensors.UsersGuide</a> for an explanation.
 revisions="<html>
 <ul>
 <li>
+January 18, 2016 by Filip Jorissen:<br/>
+Using parameter <code>tauInv</code> 
+since this now exists in
+<a href=\"modelica://Buildings.Fluid.Sensors.BaseClasses.PartialDynamicFlowSensor\">Buildings.Fluid.Sensors.BaseClasses.PartialDynamicFlowSensor</a>.
+This is for
+<a href=\"https://github.com/iea-annex60/modelica-annex60/issues/372\">#372</a>.
+</li>
+<li>
 September 10, 2013 by Michael Wetter:<br/>
 Set <code>start</code> attribute for <code>wetBulMod</code>
 to use consistent start values within this model.
 </li>
 <li>
 June 3, 2011 by Michael Wetter:<br/>
-Revised implementation to add dynamics in such a way that 
+Revised implementation to add dynamics in such a way that
 the time constant increases as the mass flow rate tends to zero.
 This significantly improves the numerics.
 </li>
@@ -136,7 +139,7 @@ Renamed output port to have the same interfaces as the dry bulb temperature sens
 <li>
 May 5, 2008, by Michael Wetter:<br/>
 First implementation.
-Implementation is based on 
+Implementation is based on
 <a href=\"modelica://Buildings.Fluid.Sensors.Temperature\">Buildings.Fluid.Sensors.Temperature</a>.
 </li>
 </ul>

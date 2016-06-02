@@ -2,10 +2,8 @@ within Buildings.Fluid.HeatExchangers.DXCoils.Examples;
 model SpaceCooling "Space cooling with DX coils"
   extends Modelica.Icons.Example;
   replaceable package Medium =
-      Buildings.Media.GasesPTDecoupled.MoistAirUnsaturated;
+      Buildings.Media.Air;
 
-  inner Modelica.Fluid.System system
-    annotation (Placement(transformation(extent={{-160,-280},{-140,-260}})));
   parameter Modelica.SIunits.Volume V=6*10*3 "Room volume";
   //////////////////////////////////////////////////////////
   // Heat recovery effectiveness
@@ -39,9 +37,10 @@ model SpaceCooling "Space cooling with DX coils"
     (QRooC_flow_nominal + mA_flow_nominal*(TASup_nominal-THeaRecLvg-dTFan)*1006)
     "Cooling load of coil, taking into account economizer, and increased due to latent heat removal";
 
-  Fluid.Movers.FlowMachine_m_flow fan(redeclare package Medium = Medium,
-      m_flow_nominal=mA_flow_nominal,
-    dynamicBalance=false) "Supply air fan"
+  Buildings.Fluid.Movers.FlowControlled_m_flow fan(
+    redeclare package Medium = Medium,
+    m_flow_nominal=mA_flow_nominal,
+    energyDynamics=Modelica.Fluid.Types.Dynamics.SteadyState) "Supply air fan"
     annotation (Placement(transformation(extent={{100,-74},{120,-54}})));
   Fluid.HeatExchangers.ConstantEffectiveness hex(redeclare package Medium1 =
         Medium, redeclare package Medium2 = Medium,
@@ -93,11 +92,11 @@ model SpaceCooling "Space cooling with DX coils"
     mA_flow_nominal=mA_flow_nominal)
     "Room model connected to single speed coil"
                                      annotation (Placement(transformation(
-          rotation=0, extent={{120,40},{140,60}})));
-  Fluid.Movers.FlowMachine_m_flow fan1(
-                                      redeclare package Medium = Medium,
-      m_flow_nominal=mA_flow_nominal,
-    dynamicBalance=false) "Supply air fan"
+          extent={{120,40},{140,60}})));
+  Buildings.Fluid.Movers.FlowControlled_m_flow fan1(
+    redeclare package Medium = Medium,
+    m_flow_nominal=mA_flow_nominal,
+    energyDynamics=Modelica.Fluid.Types.Dynamics.SteadyState) "Supply air fan"
     annotation (Placement(transformation(extent={{100,-174},{120,-154}})));
   Fluid.HeatExchangers.ConstantEffectiveness hex1(
     redeclare package Medium1 =
@@ -131,7 +130,7 @@ model SpaceCooling "Space cooling with DX coils"
     QRooInt_flow=QRooInt_flow,
     mA_flow_nominal=mA_flow_nominal) "Room model connected to multi stage coil"
                                      annotation (Placement(transformation(
-          rotation=0, extent={{180,40},{200,60}})));
+          extent={{180,40},{200,60}})));
 
   Buildings.Fluid.HeatExchangers.DXCoils.Data.Generic.DXCoil
     datCoi(
@@ -149,7 +148,7 @@ model SpaceCooling "Space cooling with DX coils"
           nSta=1)
     annotation (Placement(transformation(extent={{0,-40},{20,-20}})));
 
-  Buildings.Fluid.HeatExchangers.DXCoils.Data.Generic.DXCoil
+  parameter Buildings.Fluid.HeatExchangers.DXCoils.Data.Generic.DXCoil
        datCoiMulSpe(nSta=2, sta=
        {Buildings.Fluid.HeatExchangers.DXCoils.Data.Generic.BaseClasses.Stage(
         spe=900/60,
@@ -174,8 +173,7 @@ model SpaceCooling "Space cooling with DX coils"
     "Coil data"
     annotation (Placement(transformation(extent={{0,-140},{20,-120}})));
   ControllerTwoStage mulSpeCon "Controller for multi-stage coil"
-                               annotation (Placement(transformation(rotation=0,
-          extent={{-60,-140},{-40,-120}})));
+                               annotation (Placement(transformation(extent={{-60,-140},{-40,-120}})));
   SimpleRoom rooVarSpe(
     redeclare package Medium = Medium,
     nPorts=2,
@@ -183,11 +181,11 @@ model SpaceCooling "Space cooling with DX coils"
     mA_flow_nominal=mA_flow_nominal)
     "Room model connected to variable speed coil"
                                      annotation (Placement(transformation(
-          rotation=0, extent={{240,40},{260,60}})));
-  Fluid.Movers.FlowMachine_m_flow fan2(
-                                      redeclare package Medium = Medium,
-      m_flow_nominal=mA_flow_nominal,
-    dynamicBalance=false) "Supply air fan"
+          extent={{240,40},{260,60}})));
+  Buildings.Fluid.Movers.FlowControlled_m_flow fan2(
+    redeclare package Medium = Medium,
+    m_flow_nominal=mA_flow_nominal,
+    energyDynamics=Modelica.Fluid.Types.Dynamics.SteadyState) "Supply air fan"
     annotation (Placement(transformation(extent={{98,-250},{118,-230}})));
   Fluid.Sensors.TemperatureTwoPort senTemSupAir2(
                                                 redeclare package Medium =
@@ -291,14 +289,15 @@ public
       nPorts=2,
       energyDynamics=Modelica.Fluid.Types.Dynamics.FixedInitial)
       annotation (Placement(transformation(extent={{-10,-20},{10,0}})));
-    Modelica.Thermal.HeatTransfer.Components.ThermalConductor theCon(G=10000/30)
-      "Thermal conductance with the ambient"
+    Modelica.Thermal.HeatTransfer.Components.ThermalConductor theCon(
+      G=10000/30,
+      port_a(T(start=Medium.T_default))) "Thermal conductance with the ambient"
       annotation (Placement(transformation(extent={{-58,-20},{-38,0}})));
-    Modelica.Thermal.HeatTransfer.Sources.PrescribedTemperature TOut
-      "Outside temperature"
+    Modelica.Thermal.HeatTransfer.Sources.PrescribedTemperature TOut(
+      port(T(start=Medium.T_default))) "Outside temperature"
       annotation (Placement(transformation(extent={{-100,-20},{-80,0}})));
-    Modelica.Thermal.HeatTransfer.Sources.FixedHeatFlow preHea(Q_flow=
-          QRooInt_flow) "Prescribed heat flow"
+    Modelica.Thermal.HeatTransfer.Sources.FixedHeatFlow preHea(
+      Q_flow=QRooInt_flow) "Prescribed heat flow"
       annotation (Placement(transformation(extent={{-58,10},{-38,30}})));
     Modelica.Thermal.HeatTransfer.Sensors.TemperatureSensor senTemRoo
       "Room temperature sensor"
@@ -318,13 +317,12 @@ public
 
     Modelica.Blocks.Interfaces.RealInput TOutDryBul
       "Outdoor drybulb temperature"
-      annotation (Placement(transformation(rotation=0, extent={{-209,-13},{-179,13}})));
+      annotation (Placement(transformation(extent={{-209,-13},{-179,13}})));
     Modelica.Blocks.Interfaces.RealOutput TRoo(unit="K") "Room temperature"
-      annotation (Placement(transformation(rotation=0, extent={{119,-13},{149,13}})));
+      annotation (Placement(transformation(extent={{119,-13},{149,13}})));
     Modelica.Fluid.Vessels.BaseClasses.VesselFluidPorts_b ports[nPorts](redeclare
         each package Medium =
-                         Medium) annotation (Placement(transformation(rotation=0,
-            extent={{-50,-170},{47,-147}})));
+                         Medium) annotation (Placement(transformation(extent={{-50,-170},{47,-147}})));
   equation
     connect(theCon.port_b,vol. heatPort) annotation (Line(
         points={{-38,-10},{-10,-10}},
@@ -373,8 +371,7 @@ equation
       smooth=Smooth.None));
   connect(rooSinSpe.ports[2], hex.port_a2)
                                      annotation (Line(
-      points={{133.517,40.1154},{133.517,-20},{133.517,-80},{-20,-80},{-20,-76},
-          {-90,-76}},
+      points={{133.517,40.1154},{133.517,-80},{-20,-80},{-20,-76},{-90,-76}},
       color={0,127,255},
       smooth=Smooth.None));
 
@@ -427,7 +424,7 @@ public
         pre_y_start=true) "Controller for coil water flow rate"
       annotation (Placement(transformation(extent={{-20,-150},{0,-130}})));
     Modelica.Blocks.Interfaces.RealInput u annotation (Placement(transformation(
-            rotation=0, extent={{-206,-133},{-180,-106}})));
+            extent={{-206,-133},{-180,-106}})));
     Modelica.Blocks.Interfaces.RealInput reference
       "Connector of Real input signal used as reference signal"
       annotation (Placement(transformation(extent={{-220,20},{-180,60}})));
@@ -636,10 +633,10 @@ equation
       smooth=Smooth.None));
   annotation (Documentation(info="<html>
 <p>
-This model illustrates the use of the DX coil models with 
+This model illustrates the use of the DX coil models with
 single speed compressor, multi-stage compressor, and variable
 speed compressor.
-The three systems all have the same simple model for a room, 
+The three systems all have the same simple model for a room,
 and the same HVAC components, except for the coil.
 The top system has a DX coil with single speed compressor
 and on/off control with dead-band.
@@ -653,7 +650,7 @@ All coils are controlled based on the respective room air temperature.
 The plot below shows how room air temperatures and humidity levels
 are controlled with the respective coils.
 The single speed coil has the highest room air humidity level because
-during its off-time, water that accumulated on the coil evaporates 
+during its off-time, water that accumulated on the coil evaporates
 into the air stream.
 This effect is smaller for the coil with two compressor stages
 and for the coil with variable compressor speed, as both of these coils
@@ -664,12 +661,25 @@ switch off less frequent.
 </p>
 <h4>Implementation</h4>
 <p>
-The model is based on 
+The model is based on
 <a href=\"modelica://Buildings.Examples.Tutorial.SpaceCooling.System3\">
 Buildings.Examples.Tutorial.SpaceCooling.System3</a>.
 </p>
 </html>", revisions="<html>
 <ul>
+<li>
+September 24, 2015 by Michael Wetter:<br/>
+Set <code>start</code> attributes in <code>SimpleRoom</code> so
+that the model translates when using the pedantic mode in Dymola 2016.
+This is for
+<a href=\"https://github.com/lbl-srg/modelica-buildings/issues/426\">#426</a>.
+</li>
+<li>
+December 22, 2014 by Michael Wetter:<br/>
+Removed <code>Modelica.Fluid.System</code>
+to address issue
+<a href=\"https://github.com/lbl-srg/modelica-buildings/issues/311\">#311</a>.
+</li>
 <li>
 September 13, 2013, by Michael Wetter:<br/>
 Changed control implementation of variable speed coil

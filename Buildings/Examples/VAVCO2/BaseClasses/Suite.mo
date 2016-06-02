@@ -139,15 +139,15 @@ scaM_flow*(5.196+2.8428+1.0044+0.9612+0.3624+0.1584);
     VPle=43) "Room model"        annotation (extent=[270,10; 290,30]);
   Occupancy occ "Occupancy"        annotation (extent=[-80,-20; -60,0],
       Placement(transformation(extent={{-80,-20},{-60,0}})));
-  Buildings.Fluid.Sensors.RelativePressure dpMea(  redeclare package Medium =
-        Medium) "Static pressure measurement"
+  Buildings.Fluid.Sensors.RelativePressure dpMea(
+      redeclare package Medium = Medium) "Static pressure measurement"
     annotation (extent=[192,110; 212,90], rotation=90);
   Modelica.Blocks.Interfaces.RealOutput p_rel "Relative pressure signal"
                                                 annotation (extent=[300,110;
-        320,90],                                                                         rotation=0);
+        320,90]);
   Modelica.Blocks.Interfaces.RealOutput yDam[6] "VAV damper positions"
                                                 annotation (extent=[300,70; 320,
-        50],                                                                             rotation=0);
+        50]);
   Buildings.Fluid.Sensors.Pressure pRoo(redeclare package Medium = Medium)
     "Room pressure"
     annotation (extent=[234,140; 254,160], Placement(transformation(extent={{
@@ -156,7 +156,7 @@ scaM_flow*(5.196+2.8428+1.0044+0.9612+0.3624+0.1584);
       Placement(transformation(extent={{262,160},{282,180}})));
   Modelica.Blocks.Interfaces.RealOutput dPRoo "Room pressurization"
                                                 annotation (extent=[300,180;
-        320,160],                                                                        rotation=0);
+        320,160]);
 equation
   connect(spl38.port_2, roo50.portSup) annotation (points=[231,120; 280.125,120;
         280.125,30], style(color=69, rgbcolor={0,127,255}));
@@ -526,6 +526,12 @@ equation
 Model of a suite consisting of five rooms for the MIT system model.
 </p></html>", revisions="<html>
 <ul>
+<li>
+January 22, 2016, by Michael Wetter:<br/>
+Corrected type declaration of pressure difference.
+This is
+for <a href=\"https://github.com/iea-annex60/modelica-annex60/issues/404\">#404</a>.
+</li>
 <li>
 July 20, 2007 by Michael Wetter:<br/>
 First implementation.

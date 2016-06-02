@@ -2,14 +2,13 @@ within Buildings.Utilities.Psychrometrics.Examples;
 model TotalAirDryAir
   "Unit test for conversion of humidity per total air and dry air mass"
   extends Modelica.Icons.Example;
-   package Medium = Buildings.Media.PerfectGases.MoistAir "Medium model"
+   package Medium = Buildings.Media.Air "Medium model"
            annotation (choicesAllMatching = true);
     Modelica.Blocks.Sources.Ramp XHum(
     duration=1,
     height=(0.01 - 0.1),
     offset=0.1) "Humidity concentration"
-                 annotation (Placement(transformation(extent={{-80,0},{-60,20}},
-                   rotation=0)));
+                 annotation (Placement(transformation(extent={{-80,0},{-60,20}})));
   ToTotalAir toTotalAir
     annotation (Placement(transformation(extent={{-40,0},{-20,20}})));
   ToDryAir toDryAir
@@ -20,23 +19,18 @@ model TotalAirDryAir
 equation
   connect(toTotalAir.XiDry, XHum.y) annotation (Line(
       points={{-41,10},{-59,10}},
-      color={0,0,127},
-      smooth=Smooth.None));
+      color={0,0,127}));
   connect(toTotalAir.XiTotalAir, toDryAir.XiTotalAir) annotation (Line(
       points={{-19,10},{-1,10}},
-      color={0,0,127},
-      smooth=Smooth.None));
+      color={0,0,127}));
   connect(toDryAir.XiDry, assertEquality.u1) annotation (Line(
       points={{21,10},{28,10},{28,-4},{38,-4}},
-      color={0,0,127},
-      smooth=Smooth.None));
+      color={0,0,127}));
   connect(assertEquality.u2, XHum.y) annotation (Line(
       points={{38,-16},{-50,-16},{-50,10},{-59,10}},
-      color={0,0,127},
-      smooth=Smooth.None));
+      color={0,0,127}));
   annotation (
 experiment(StopTime=1.0),
 __Dymola_Commands(file="modelica://Buildings/Resources/Scripts/Dymola/Utilities/Psychrometrics/Examples/TotalAirDryAir.mos"
-        "Simulate and plot"),                                                                                                    Diagram(
-        coordinateSystem(preserveAspectRatio=true, extent={{-100,-100},{100,100}})));
+        "Simulate and plot"));
 end TotalAirDryAir;

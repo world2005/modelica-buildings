@@ -13,22 +13,17 @@ model OffTimer "Example model for off timer"
 equation
   connect(booleanPulse.y, offTim1.u) annotation (Line(
       points={{-59,10},{-2,10}},
-      color={255,0,255},
-      smooth=Smooth.None));
+      color={255,0,255}));
   connect(booleanPulse.y, not1.u) annotation (Line(
       points={{-59,10},{-50,10},{-50,-30},{-42,-30}},
-      color={255,0,255},
-      smooth=Smooth.None));
+      color={255,0,255}));
   connect(offTim2.u, not1.y) annotation (Line(
       points={{-2,-30},{-19,-30}},
-      color={255,0,255},
-      smooth=Smooth.None));
+      color={255,0,255}));
  annotation (
 experiment(StopTime=1),
 __Dymola_Commands(file="modelica://Buildings/Resources/Scripts/Dymola/Controls/Continuous/Examples/OffTimer.mos"
         "Simulate and plot"),
-              Diagram(coordinateSystem(preserveAspectRatio=true, extent={{-100,
-            -100},{100,100}})),
     Documentation(
 info="<html>
 <p>
@@ -38,6 +33,7 @@ Buildings.Controls.Continuous.OffTimer</a>.
 The input to the two timers are alternating boolean values.
 Whenever the input becomes <code>false(=0)</code>, the timer is reset.
 The figures below show the input and output of the blocks.
+</p>
 <p align=\"center\">
 <img src=\"modelica://Buildings/Resources/Images/Controls/Continuous/Examples/OffTimer1.png\" border=\"1\" alt=\"Input and output of the OffTimer offTim1.\"/><br/>
 <img src=\"modelica://Buildings/Resources/Images/Controls/Continuous/Examples/OffTimer2.png\" border=\"1\" alt=\"Input and output of the OffTimer offTim1.\"/>

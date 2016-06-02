@@ -16,45 +16,52 @@ model SkyClearness "Test model for sky clearness"
 equation
   connect(zen.y, skyCle.zen) annotation (Line(
       points={{-19,-10},{10,-10},{10,4},{38,4}},
-      color={0,0,127},
-      smooth=Smooth.None));
+      color={0,0,127}));
 
   connect(weaDat.weaBus, weaBus) annotation (Line(
       points={{-20,30},{8,30}},
       color={255,204,51},
-      thickness=0.5,
-      smooth=Smooth.None), Text(
+      thickness=0.5), Text(
       string="%second",
       index=1,
       extent={{6,3},{6,3}}));
   connect(weaBus.HGloHor, skyCle.HGloHor) annotation (Line(
       points={{8,30},{24,30},{24,16},{38,16}},
       color={255,204,51},
-      thickness=0.5,
-      smooth=Smooth.None), Text(
+      thickness=0.5), Text(
       string="%first",
       index=-1,
       extent={{-6,3},{-6,3}}));
   connect(weaBus.HDifHor, skyCle.HDifHor) annotation (Line(
       points={{8,30},{24,30},{24,10},{38,10}},
       color={255,204,51},
-      thickness=0.5,
-      smooth=Smooth.None), Text(
+      thickness=0.5), Text(
       string="%first",
       index=-1,
       extent={{-6,3},{-6,3}}));
 
   connect(weaBus, zen.weaBus) annotation (Line(
-      points={{8,30},{8,12},{-54,12},{-54,-10},{-40.2,-10}},
+      points={{8,30},{8,12},{-54,12},{-54,-10},{-40,-10}},
       color={255,204,51},
-      thickness=0.5,
-      smooth=Smooth.None), Text(
+      thickness=0.5), Text(
       string="%first",
       index=-1,
       extent={{-6,3},{-6,3}}));
   annotation (
+Documentation(info="<html>
+<p>
+This example computes the sky clearness.
+</p>
+</html>",
+revisions="<html>
+<ul>
+<li>
+July 07, 2010, by Wangda Zuo:<br/>
+First implementation.
+</li>
+</ul>
+</html>"),
 experiment(StartTime=100000, StopTime=300000),
 __Dymola_Commands(file="modelica://Buildings/Resources/Scripts/Dymola/BoundaryConditions/SolarIrradiation/BaseClasses/Examples/SkyClearness.mos"
-        "Simulate and plot"),
-    Icon(graphics));
+        "Simulate and plot"));
 end SkyClearness;

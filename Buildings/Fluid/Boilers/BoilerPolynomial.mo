@@ -26,36 +26,46 @@ model BoilerPolynomial
     "Mass of boiler that will be lumped to water heat capacity"
     annotation(Dialog(tab = "Dynamics", enable = not (energyDynamics == Modelica.Fluid.Types.Dynamics.SteadyState)));
 
-  Real eta(min=0) "Boiler efficiency";
-
-  Modelica.SIunits.Power QFue_flow "Heat released by fuel";
-  Modelica.SIunits.Power QWat_flow "Heat transfer from gas into water";
-  Modelica.SIunits.MassFlowRate mFue_flow "Fuel mass flow rate";
-  Modelica.SIunits.VolumeFlowRate VFue_flow "Fuel volume flow rate";
+  Modelica.SIunits.Efficiency eta=
+    if effCur ==Buildings.Fluid.Types.EfficiencyCurves.Constant then
+      a[1]
+    elseif effCur ==Buildings.Fluid.Types.EfficiencyCurves.Polynomial then
+      Buildings.Utilities.Math.Functions.polynomial(a=a, x=y)
+   elseif effCur ==Buildings.Fluid.Types.EfficiencyCurves.QuadraticLinear then
+      Buildings.Utilities.Math.Functions.quadraticLinear(a=aQuaLin, x1=y, x2=T)
+   else
+      0
+  "Boiler efficiency";
+  Modelica.SIunits.Power QFue_flow = y * Q_flow_nominal/eta_nominal
+    "Heat released by fuel";
+  Modelica.SIunits.Power QWat_flow = eta * QFue_flow
+    "Heat transfer from gas into water";
+  Modelica.SIunits.MassFlowRate mFue_flow = QFue_flow/fue.h
+    "Fuel mass flow rate";
+  Modelica.SIunits.VolumeFlowRate VFue_flow = mFue_flow/fue.d
+    "Fuel volume flow rate";
 
   Modelica.Blocks.Interfaces.RealInput y(min=0, max=1) "Part load ratio"
-    annotation (Placement(transformation(extent={{-140,60},{-100,100}},
-          rotation=0)));
-protected
-  Real eta_nominal "Boiler efficiency at nominal condition";
+    annotation (Placement(transformation(extent={{-140,60},{-100,100}})));
 
-  Modelica.Thermal.HeatTransfer.Components.ThermalConductor UAOve(G=UA)
-    "Overall thermal conductance (if heatPort is connected)"
-    annotation (Placement(transformation(extent={{-48,10},{-28,30}})));
-public
-  Modelica.Thermal.HeatTransfer.Interfaces.HeatPort_a heatPort
-    "Heat port, can be used to connect to ambient"
-                             annotation (Placement(transformation(extent={{-10,62},
-            {10,82}},            rotation=0)));
-  Modelica.Thermal.HeatTransfer.Components.HeatCapacitor heaCapDry(C=500*mDry,
-      T(start=T_start)) if not (energyDynamics == Modelica.Fluid.Types.Dynamics.SteadyState)
-    "heat capacity of boiler metal"
-    annotation (Placement(transformation(extent={{-80,12},{-60,32}})));
   Modelica.Blocks.Interfaces.RealOutput T(final quantity="ThermodynamicTemperature",
                                           final unit = "K", displayUnit = "degC", min=0)
-                                          annotation (Placement(
-        transformation(extent={{100,70},{120,90}}, rotation=0)));
+    annotation (Placement(transformation(extent={{100,70},{120,90}})));
+
+  Modelica.Thermal.HeatTransfer.Interfaces.HeatPort_a heatPort
+    "Heat port, can be used to connect to ambient"
+    annotation (Placement(transformation(extent={{-10,62}, {10,82}})));
+  Modelica.Thermal.HeatTransfer.Components.HeatCapacitor heaCapDry(
+    C=500*mDry,
+    T(start=T_start)) if not (energyDynamics == Modelica.Fluid.Types.Dynamics.SteadyState)
+    "heat capacity of boiler metal"
+    annotation (Placement(transformation(extent={{-80,12},{-60,32}})));
+
 protected
+  parameter Real eta_nominal(fixed=false) "Boiler efficiency at nominal condition";
+  parameter Real aQuaLin[6] = if size(a, 1) == 6 then a else fill(0, 6)
+  "Auxiliary variable for efficiency curve because quadraticLinear requires exactly 6 elements";
+
   Buildings.HeatTransfer.Sources.PrescribedHeatFlow preHeaFlo
     annotation (Placement(transformation(extent={{-43,-40},{-23,-20}})));
   Modelica.Blocks.Sources.RealExpression Q_flow_in(y=QWat_flow)
@@ -63,32 +73,36 @@ protected
   Modelica.Thermal.HeatTransfer.Sensors.TemperatureSensor temSen
     "Temperature of fluid"
     annotation (Placement(transformation(extent={{0,30},{20,50}})));
-equation
+
+  Modelica.Thermal.HeatTransfer.Components.ThermalConductor UAOve(G=UA)
+    "Overall thermal conductance (if heatPort is connected)"
+    annotation (Placement(transformation(extent={{-48,10},{-28,30}})));
+
+initial equation
+  if  effCur == Buildings.Fluid.Types.EfficiencyCurves.QuadraticLinear then
+    assert(size(a, 1) == 6,
+    "The boiler has the efficiency curve set to 'Buildings.Fluid.Types.EfficiencyCurves.QuadraticLinear',
+    and hence the parameter 'a' must have exactly 6 elements.
+    However, only " + String(size(a, 1)) + " elements were provided.");
+  end if;
+
   if effCur ==Buildings.Fluid.Types.EfficiencyCurves.Constant then
-    eta  = a[1];
     eta_nominal = a[1];
   elseif effCur ==Buildings.Fluid.Types.EfficiencyCurves.Polynomial then
-    eta  = Buildings.Utilities.Math.Functions.polynomial(
-                                                   a=a, x=y);
     eta_nominal = Buildings.Utilities.Math.Functions.polynomial(
                                                           a=a, x=1);
   elseif effCur ==Buildings.Fluid.Types.EfficiencyCurves.QuadraticLinear then
-    eta  = Buildings.Utilities.Math.Functions.quadraticLinear(
-                                                        a=a, x1=y, x2=T);
+    // For this efficiency curve, a must have 6 elements.
     eta_nominal = Buildings.Utilities.Math.Functions.quadraticLinear(
-                                                               a=a, x1=1, x2=T_nominal);
+                                                               a=aQuaLin, x1=1, x2=T_nominal);
   else
-    eta  = 0;
-    eta_nominal = 999;
+     eta_nominal = 999;
   end if;
+
+equation
+
   assert(eta > 0.001, "Efficiency curve is wrong.");
-  // Heat released by fuel
-  QFue_flow = y * Q_flow_nominal/eta_nominal;
-  // Heat input into water
-  QWat_flow = eta * QFue_flow;
-  // Fuel mass flow rate and volume flow rate
-  mFue_flow = QFue_flow/fue.h;
-  VFue_flow = mFue_flow/fue.d;
+
   connect(UAOve.port_b, vol.heatPort)            annotation (Line(
       points={{-28,20},{-22,20},{-22,-10},{-9,-10}},
       color={191,0,0},
@@ -117,7 +131,7 @@ equation
       points={{-9,-10},{-16,-10},{-16,40},{0,40}},
       color={191,0,0},
       smooth=Smooth.None));
-  annotation (Diagram(graphics), Icon(graphics={
+  annotation ( Icon(graphics={
         Ellipse(
           extent={{-20,22},{20,-20}},
           fillColor={127,0,0},
@@ -132,7 +146,6 @@ equation
           lineColor={0,0,0}),
         Line(
           points={{-100,80},{-80,80},{-80,-44},{-6,-44}},
-          pattern=LinePattern.None,
           smooth=Smooth.None),
         Text(
           extent={{-140,138},{-94,100}},
@@ -150,17 +163,17 @@ defaultComponentName="boi",
 Documentation(info="<html>
 <p>
 This is a model of a boiler whose efficiency is described
-by a polynomial. 
+by a polynomial.
 The heat input into the medium is</p>
 <p align=\"center\" style=\"font-style:italic;\">
   Q&#775; = y Q&#775;<sub>0</sub> &eta; &frasl; &eta;<sub>0</sub>
 </p>
 <p>
-where 
+where
 <i>y &isin; [0, 1]</i> is the control signal,
 <i>Q&#775;<sub>0</sub></i> is the nominal power,
 <i>&eta;</i> is the efficiency at the current operating point, and
-<i>&eta;<sub>0</sub></i> is the efficiency at <i>y=1</i> and 
+<i>&eta;<sub>0</sub></i> is the efficiency at <i>y=1</i> and
 nominal temperature <i>T=T<sub>0</sub></i> as specified by the parameter
 <code>T_nominal</code>.
 </p>
@@ -173,13 +186,13 @@ to compute the efficiency, which is defined as
 </p>
 <p>
 where
-<i>Q&#775;</i> is the heat transfered to the working fluid (typically water or air), and
+<i>Q&#775;</i> is the heat transferred to the working fluid (typically water or air), and
 <i>Q&#775;<sub>f</sub></i> is the heat of combustion released by the fuel.
 </p>
 <p>
 The following polynomials can be selected to compute the efficiency:
 </p>
-<table summary=\"summary\"  border=\"1\" cellspacing=0 cellpadding=2 style=\"border-collapse:collapse;\">
+<table summary=\"summary\"  border=\"1\" cellspacing=\"0\" cellpadding=\"2\" style=\"border-collapse:collapse;\">
 <tr>
 <th>Parameter <code>effCur</code></th>
 <th>Efficiency curve</th>
@@ -194,9 +207,9 @@ The following polynomials can be selected to compute the efficiency:
 </tr>
 <tr>
 <td>Buildings.Fluid.Types.EfficiencyCurves.QuadraticLinear</td>
-<td><i>&eta; = a<sub>1</sub> + a<sub>2</sub>  y 
-        + a<sub>3</sub> y<sup>2</sup> 
-        + (a<sub>4</sub> + a<sub>5</sub>  y 
+<td><i>&eta; = a<sub>1</sub> + a<sub>2</sub>  y
+        + a<sub>3</sub> y<sup>2</sup>
+        + (a<sub>4</sub> + a<sub>5</sub>  y
         + a<sub>6</sub> y<sup>2</sup>)  T
 </i></td>
 </tr>
@@ -209,7 +222,7 @@ an arbitrary number of polynomial coefficients can be specified.
 </p>
 <p>
 The parameter <code>Q_flow_nominal</code> is the power transferred to the fluid
-for <code>y=1</code> and, if the efficiency depends on temperature, 
+for <code>y=1</code> and, if the efficiency depends on temperature,
 for <code>T=T0</code>.
 </p>
 <p>
@@ -224,7 +237,7 @@ The fuel mass flow rate and volume flow rate are computed as </p>
 <p>
 where the fuel heating value
 <i>h<sub>f</sub></i> and the fuel mass density
-<i>&rho;<sub>f</sub></i> are obtained from the 
+<i>&rho;<sub>f</sub></i> are obtained from the
 parameter <code>fue</code>.
 Note that if <i>&eta;</i> is the efficiency relative to the lower heating value,
 then the fuel properties also need to be used for the lower heating value.
@@ -249,6 +262,12 @@ which are lumped into one state. The boiler outlet temperature is equal to this 
 </html>", revisions="<html>
 <ul>
 <li>
+May 27, 2016, by Michael Wetter:<br/>
+Corrected size of input argument to
+<code>Buildings.Utilities.Math.Functions.quadraticLinear</code>
+for JModelica compliance check.
+</li>
+<li>
 May 30, 2014, by Michael Wetter:<br/>
 Removed undesirable annotation <code>Evaluate=true</code>.
 </li>
@@ -271,7 +290,7 @@ May 25, 2011 by Michael Wetter:<br/>
 <li>
 Removed parameter <code>dT_nominal</code>, and require instead
 the parameter <code>m_flow_nominal</code> to be set by the user.
-This was needed to avoid a non-literal value for the nominal attribute 
+This was needed to avoid a non-literal value for the nominal attribute
 of the pressure drop model.
 </li>
 <li>

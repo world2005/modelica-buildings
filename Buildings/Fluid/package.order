@@ -3,8 +3,10 @@ Actuators
 Boilers
 Chillers
 Delays
+FMI
 FixedResistances
 HeatExchangers
+HeatPumps
 MassExchangers
 MixingVolumes
 Movers
@@ -15,5 +17,6 @@ Storage
 Utilities
 Data
 Types
-BaseClasses
+Examples
 Interfaces
+BaseClasses

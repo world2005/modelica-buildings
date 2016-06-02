@@ -1,5 +1,6 @@
 within Buildings.Fluid;
 package Types "Package with type definitions"
+  extends Modelica.Icons.TypesPackage;
 
   type EfficiencyCurves = enumeration(
       Constant "constant",
@@ -13,42 +14,42 @@ package Types "Package with type definitions"
       Av "Av (metric) flow coefficient")
     "Enumeration to define the choice of valve flow coefficient" annotation (
       Documentation(info="<html>
- 
+
 <p>
 Enumeration to define the choice of valve flow coefficient
 (to be selected via choices menu):
 </p>
- 
+
 <table summary=\"summary\"  border=\"1\">
 <tr><th>Enumeration</th>
     <th>Description</th></tr>
- 
+
 <tr><td>OpPoint</td>
     <td>flow coefficient defined by ratio m_flow_nominal/sqrt(dp_nominal)</td></tr>
- 
+
 <tr><td>Kv</td>
     <td>Kv (metric) flow coefficient</td></tr>
- 
+
 <tr><td>Cv</td>
     <td>Cv (US) flow coefficient</td></tr>
- 
+
 <tr><td>Av</td>
     <td>Av (metric) flow coefficient</td></tr>
 
 </table>
 
 <p>
-The details of the coefficients are explained in the 
+The details of the coefficients are explained in the
 <a href=\"modelica://Modelica.Fluid.UsersGuide.ComponentDefinition.ValveCharacteristics\">
 Users Guide</a>.
 </p>
- 
+
 </html>"));
   type EfficiencyInput = enumeration(
       volume "use state of fluid volume",
       port_a "use port_a",
       port_b "use port_b",
-      average "use (port_a+port_b)/2)")
+      average "use (port_a+port_b)/2")
     "Enumeration to define the input for efficiency curves";
   type HeatExchangerConfiguration = enumeration(
       ParallelFlow "Parallel flow",
@@ -77,7 +78,7 @@ The following heat exchanger configurations are available in this enumeration:
 <p>
 Note that for a given heat exchanger, the
  <code>HeatExchangerConfiguration</code> is fixed. However, if the capacity
- flow rates change, then the 
+ flow rates change, then the
  <a href=\"modelica://Buildings.Fluid.Types.HeatExchangerFlowRegime\">
  HeatExchangerFlowRegime</a> may change. For example,
  a counter flow heat exchanger has <code>HeatExchangerConfiguration=CounterFlow</code>,
@@ -123,7 +124,38 @@ The following heat exchanger flow regimes are available in this enumeration:
 <tr><td>CrossFlowCMinUnmixedCMaxMixed</td><td>Cross flow, CMin unmixed, CMax mixed</td></tr>
 </table>
 </html>"));
-annotation (preferredView="info", Documentation(info="<html>
+  type InputType = enumeration(
+      Constant "Use parameter to set stage",
+      Stages "Use integer input to select stage",
+      Continuous "Use continuous, real input") "Input options for movers"
+    annotation (Documentation(info="<html>
+<p>
+This type allows defining which type of input should be used for movers. 
+This can either be
+</p>
+<ol>
+<li>
+a constant set point declared by a parameter,
+</li>
+<li>
+a series of possible set points that can be switched using an integer input, or
+</li>
+<li>
+a continuously variable set point.
+</li>
+</ol>
+</html>", revisions="<html>
+<ul>
+<li>
+April 2, 2015, by Filip Jorissen:<br/>
+First implementation.
+</li>
+</ul>
+</html>"));
+
+ annotation (preferredView="info", Documentation(info="<html>
+<p>
 This package contains type definitions.
+</p>
 </html>"));
 end Types;

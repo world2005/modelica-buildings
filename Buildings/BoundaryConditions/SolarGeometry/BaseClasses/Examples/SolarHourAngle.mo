@@ -15,8 +15,7 @@ equation
       points={{-60,5.82867e-16},{-56,5.82867e-16},{-56,1.13798e-15},{-52,
           1.13798e-15},{-52,0},{-44,0}},
       color={255,204,51},
-      thickness=0.5,
-      smooth=Smooth.None), Text(
+      thickness=0.5), Text(
       string="%second",
       index=1,
       extent={{6,3},{6,3}}));
@@ -24,13 +23,26 @@ equation
       points={{-44,5.55112e-16},{-33.5,5.55112e-16},{-33.5,1.22125e-15},{-23,
           1.22125e-15},{-23,6.66134e-16},{-2,6.66134e-16}},
       color={255,204,51},
-      thickness=0.5,
-      smooth=Smooth.None), Text(
+      thickness=0.5), Text(
       string="%first",
       index=-1,
       extent={{-6,3},{-6,3}}));
-  annotation (Diagram(graphics), 
-experiment(StopTime=86400),
+  annotation (experiment(StopTime=86400),
+Documentation(info="<html>
+<p>
+This example computes the solar hour angle,
+which is defined as the angle between the circle
+that passes through an observer, the north pole and the south pole,
+and the circle that passes through the sun, the north and the south pole.
+</p>
+</html>", revisions="<html>
+<ul>
+<li>
+May 17, 2010, by Wangda Zuo:<br/>
+First implementation.
+</li>
+</ul>
+</html>"),
 __Dymola_Commands(file="modelica://Buildings/Resources/Scripts/Dymola/BoundaryConditions/SolarGeometry/BaseClasses/Examples/SolarHourAngle.mos"
         "Simulate and plot"));
 end SolarHourAngle;

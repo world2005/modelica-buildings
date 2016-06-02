@@ -44,10 +44,9 @@ annotation (
 smoothOrder=1,
 Documentation(info="<html>
 <p>
-fixme
+This function computes the heat flow rate for the radiant slab.
 </p>
-</html>
-",
+</html>",
 revisions="<html>
 <ul>
 <li>

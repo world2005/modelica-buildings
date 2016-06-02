@@ -48,34 +48,26 @@ protected
 equation
  connect(filter.y, y_filtered) annotation (Line(
       points={{20.7,88},{50,88}},
-      color={0,0,127},
-      smooth=Smooth.None));
+      color={0,0,127}));
   if filteredOpening then
   connect(y, filter.u) annotation (Line(
       points={{1.11022e-15,120},{1.11022e-15,88},{4.6,88}},
-      color={0,0,127},
-      smooth=Smooth.None));
+      color={0,0,127}));
   connect(filter.y, y_actual) annotation (Line(
       points={{20.7,88},{30,88},{30,70},{50,70}},
-      color={0,0,127},
-      smooth=Smooth.None));
+      color={0,0,127}));
   else
     connect(y, y_actual) annotation (Line(
       points={{1.11022e-15,120},{0,120},{0,70},{50,70}},
-      color={0,0,127},
-      smooth=Smooth.None));
+      color={0,0,127}));
   end if;
 
   annotation (Icon(coordinateSystem(preserveAspectRatio=false, extent={{-100,
             -100},{100,100}}), graphics={
         Line(
-          points={{0,40},{0,100}},
-          color={0,0,0},
-          smooth=Smooth.None),
+          points={{0,40},{0,100}}),
         Line(
-          points={{0,70},{40,70}},
-          color={0,0,0},
-          smooth=Smooth.None),
+          points={{0,70},{40,70}}),
         Rectangle(
           visible=filteredOpening,
           extent={{-32,40},{32,100}},
@@ -100,12 +92,12 @@ Documentation(info="<html>
 <p>
 This model implements the filter that is used to approximate the travel
 time of the actuator.
-Models that extend this model use the signal 
+Models that extend this model use the signal
 <code>y_actual</code> to obtain the
 current position of the actuator.
 </p>
 <p>
-See 
+See
 <a href=\"modelica://Buildings.Fluid.Actuators.UsersGuide\">
 Buildings.Fluid.Actuators.UsersGuide</a>
 for a description of the filter.

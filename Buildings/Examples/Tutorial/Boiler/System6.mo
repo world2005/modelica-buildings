@@ -3,9 +3,9 @@ model System6
   "6th part of the system model, which adds weather data and changes to PI control"
   extends Modelica.Icons.Example;
   replaceable package MediumA =
-      Buildings.Media.GasesPTDecoupled.MoistAirUnsaturated;
+      Buildings.Media.Air;
   replaceable package MediumW =
-      Buildings.Media.ConstantPropertyLiquidWater "Medium model";
+      Buildings.Media.Water "Medium model";
 
   parameter Modelica.SIunits.HeatFlowRate Q_flow_nominal = 20000
     "Nominal heat flow rate of radiator";
@@ -31,8 +31,6 @@ model System6
     Q_flow_nominal/4200/(TBoiSup_nominal-TRadRet_nominal)
     "Radiator nominal mass flow rate";
 
-  inner Modelica.Fluid.System system
-    annotation (Placement(transformation(extent={{-80,60},{-60,80}})));
   Buildings.Fluid.MixingVolumes.MixingVolume vol(
     redeclare package Medium = MediumA,
     energyDynamics=Modelica.Fluid.Types.Dynamics.FixedInitial,
@@ -76,9 +74,8 @@ model System6
   Modelica.Thermal.HeatTransfer.Sensors.TemperatureSensor temRoo
     "Room temperature" annotation (Placement(transformation(
         extent={{10,-10},{-10,10}},
-        rotation=0,
         origin={-40,30})));
-  Buildings.Fluid.Movers.FlowMachine_m_flow pumRad(
+  Buildings.Fluid.Movers.FlowControlled_m_flow pumRad(
     redeclare package Medium = MediumW,
     energyDynamics=Modelica.Fluid.Types.Dynamics.FixedInitial,
     m_flow_nominal=mRad_flow_nominal) "Pump for radiator"
@@ -141,7 +138,7 @@ model System6
         origin={60,-150})));
 //----------------------------------------------------------------------------//
 
-  Buildings.Fluid.Movers.FlowMachine_m_flow pumBoi(
+  Buildings.Fluid.Movers.FlowControlled_m_flow pumBoi(
       redeclare package Medium = MediumW,
       energyDynamics=Modelica.Fluid.Types.Dynamics.FixedInitial,
       m_flow_nominal=mBoi_flow_nominal) "Pump for boiler"
@@ -186,7 +183,7 @@ model System6
                         annotation (Placement(transformation(
         extent={{-10,-10},{10,10}},
         rotation=270,
-        origin={60,-250})));
+        origin={60,-230})));
   Buildings.Fluid.Sensors.TemperatureTwoPort temRet(redeclare package Medium =
         MediumW, m_flow_nominal=mBoi_flow_nominal) "Return water temperature"
                                           annotation (Placement(transformation(
@@ -201,7 +198,7 @@ model System6
                         annotation (Placement(transformation(
         extent={{-10,-10},{10,10}},
         rotation=90,
-        origin={-50,-250})));
+        origin={-50,-230})));
 
 //--------------------------------------------------------------------------------//
   Modelica.Blocks.Logical.Hysteresis hysTOut(uLow=273.15 + 16, uHigh=273.15 + 17)
@@ -247,15 +244,15 @@ model System6
     annotation (Placement(transformation(extent={{-220,-82},{-200,-62}})));
   Modelica.Blocks.Sources.Constant TSetBoiRet(k=TBoiRet_min)
     "Temperature setpoint for boiler return"
-    annotation (Placement(transformation(extent={{120,-320},{140,-300}})));
-
+    annotation (Placement(transformation(extent={{120,-270},{140,-250}})));
 
  Buildings.Controls.Continuous.LimPID conPIDBoi(
     Td=1,
     Ti=120,
     controllerType=Modelica.Blocks.Types.SimpleController.PI,
-    k=0.1) "Controller for valve in boiler loop"
-    annotation (Placement(transformation(extent={{160,-290},{180,-270}})));
+    k=0.1,
+    reverseAction=true) "Controller for valve in boiler loop"
+    annotation (Placement(transformation(extent={{160,-270},{180,-250}})));
 //--------------------------------------------------------------------------------//
 
   Controls.SetPoints.Table TSetSup(table=[273.15 + 19, 273.15 + 50;
@@ -324,11 +321,11 @@ equation
       color={0,127,255},
       smooth=Smooth.None));
   connect(pumBoi.port_b, spl1.port_1) annotation (Line(
-      points={{-50,-270},{-50,-260}},
+      points={{-50,-270},{-50,-240}},
       color={0,127,255},
       smooth=Smooth.None));
   connect(spl1.port_2, spl.port_1) annotation (Line(
-      points={{-50,-240},{-50,-200}},
+      points={{-50,-220},{-50,-200}},
       color={0,127,255},
       smooth=Smooth.None));
   connect(spl.port_2, valRad.port_1)
@@ -343,12 +340,12 @@ equation
       smooth=Smooth.None));
   connect(spl1.port_3, valBoi.port_3)
                                     annotation (Line(
-      points={{-40,-250},{50,-250}},
+      points={{-40,-230},{50,-230}},
       color={0,127,255},
       smooth=Smooth.None));
   connect(valBoi.port_2, temRet.port_a)
                                       annotation (Line(
-      points={{60,-260},{60,-270}},
+      points={{60,-240},{60,-270}},
       color={0,127,255},
       smooth=Smooth.None));
   connect(temRet.port_b, boi.port_a) annotation (Line(
@@ -361,7 +358,7 @@ equation
       smooth=Smooth.None));
   connect(mix2.port_2, valBoi.port_1)
                                     annotation (Line(
-      points={{60,-200},{60,-240}},
+      points={{60,-200},{60,-220}},
       color={0,127,255},
       smooth=Smooth.None));
   connect(spl4.port_2, mix2.port_1) annotation (Line(
@@ -450,14 +447,6 @@ equation
       points={{-159,-150},{-152,-150},{-152,-70},{-142,-70}},
       color={255,0,255},
       smooth=Smooth.None));
-  connect(temRet.T,conPIDBoi. u_s) annotation (Line(
-      points={{71,-280},{158,-280}},
-      color={0,0,127},
-      smooth=Smooth.None));
-  connect(TSetBoiRet.y,conPIDBoi. u_m) annotation (Line(
-      points={{141,-310},{170,-310},{170,-292}},
-      color={0,0,127},
-      smooth=Smooth.None));
   connect(temRoo.T, TSetSup.u) annotation (Line(
       points={{-50,30},{-270,30},{-270,-10},{-222,-10}},
       color={0,0,127},
@@ -507,9 +496,13 @@ equation
       color={0,0,127},
       smooth=Smooth.None));
   connect(conPIDBoi.y, valBoi.y) annotation (Line(
-      points={{181,-280},{200,-280},{200,-250},{72,-250}},
+      points={{181,-260},{200,-260},{200,-230},{72,-230}},
       color={0,0,127},
       smooth=Smooth.None));
+  connect(TSetBoiRet.y, conPIDBoi.u_s) annotation (Line(points={{141,-260},{
+          149.5,-260},{158,-260}}, color={0,0,127}));
+  connect(temRet.T, conPIDBoi.u_m) annotation (Line(points={{71,-280},{114,-280},
+          {170,-280},{170,-272}}, color={0,0,127}));
   annotation (Documentation(info="<html>
 <p>
 This part of the system model adds to the model that is implemented in
@@ -587,6 +580,19 @@ maintained at their set point.
 </html>", revisions="<html>
 <ul>
 <li>
+July 2, 2015, by Michael Wetter:<br/>
+Changed control input for <code>conPIDBoi</code> and set
+<code>reverseAction=true</code>
+to address issue
+<a href=\"https://github.com/lbl-srg/modelica-buildings/issues/436\">#436</a>.
+</li>
+<li>
+December 22, 2014 by Michael Wetter:<br/>
+Removed <code>Modelica.Fluid.System</code>
+to address issue
+<a href=\"https://github.com/lbl-srg/modelica-buildings/issues/311\">#311</a>.
+</li>
+<li>
 March 1, 2013, by Michael Wetter:<br/>
 Added nominal pressure drop for valves as
 this parameter no longer has a default value.
@@ -597,7 +603,7 @@ First implementation.
 </li>
 </ul>
 </html>"),
-    Diagram(coordinateSystem(preserveAspectRatio=true, extent={{-400,-360},{240,
+    Diagram(coordinateSystem(preserveAspectRatio=false,extent={{-400,-360},{240,
             100}})),
     __Dymola_Commands(file=
      "modelica://Buildings/Resources/Scripts/Dymola/Examples/Tutorial/Boiler/System6.mos"

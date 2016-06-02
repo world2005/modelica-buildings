@@ -10,13 +10,13 @@ model IdealMotor "Ideal motor model with hysteresis"
   Modelica.Blocks.Logical.Hysteresis uppHys(final uLow=0, uHigh=delta,
     final pre_y_start=false)
                        annotation (Placement(transformation(extent={{-60,20},{
-            -40,40}}, rotation=0)));
+            -40,40}})));
   Modelica.Blocks.Logical.Hysteresis lowHys(uLow=-delta, final uHigh=0,
     final pre_y_start=true) "Lower hysteresis"
                                          annotation (Placement(transformation(
-          extent={{-60,-40},{-40,-20}}, rotation=0)));
+          extent={{-60,-40},{-40,-20}})));
   Modelica.Blocks.Logical.Switch uppSwi annotation (Placement(transformation(
-          extent={{0,20},{20,40}}, rotation=0)));
+          extent={{0,20},{20,40}})));
   Modelica.Blocks.Continuous.LimIntegrator int(
     final y_start=y_start,
     final k=1,
@@ -25,24 +25,22 @@ model IdealMotor "Ideal motor model with hysteresis"
     initType=Modelica.Blocks.Types.Init.InitialState,
     limitsAtInit=true,
     y(stateSelect=StateSelect.always)) "Integrator for valve opening position"
-    annotation (Placement(transformation(extent={{60,-10},{80,10}}, rotation=0)));
+    annotation (Placement(transformation(extent={{60,-10},{80,10}})));
 
 protected
   final Modelica.Blocks.Sources.Constant zer(final k=0) "Zero signal"
-    annotation (Placement(transformation(extent={{-40,-10},{-20,10}}, rotation=
-            0)));
+    annotation (Placement(transformation(extent={{-40,-10},{-20,10}})));
   Modelica.Blocks.Sources.Constant vOpe(final k=1/tOpe) "Opening speed"
-    annotation (Placement(transformation(extent={{-40,60},{-20,80}}, rotation=0)));
+    annotation (Placement(transformation(extent={{-40,60},{-20,80}})));
   Modelica.Blocks.Sources.Constant vClo(final k=-1/tClo) "Closing speed"
-    annotation (Placement(transformation(extent={{-40,-80},{-20,-60}}, rotation=
-           0)));
+    annotation (Placement(transformation(extent={{-40,-80},{-20,-60}})));
   Modelica.Blocks.Logical.Switch lowSwi annotation (Placement(transformation(
-          extent={{0,-40},{20,-20}}, rotation=0)));
+          extent={{0,-40},{20,-20}})));
   Modelica.Blocks.Math.Add add annotation (Placement(transformation(extent={{32,
-            -10},{52,10}}, rotation=0)));
+            -10},{52,10}})));
   Modelica.Blocks.Math.Feedback feeBac "Feedback to compute position error"
                                          annotation (Placement(transformation(
-          extent={{-90,-10},{-70,10}}, rotation=0)));
+          extent={{-90,-10},{-70,10}})));
 equation
   connect(zer.y, uppSwi.u3) annotation (Line(points={{-19,6.10623e-016},{-14,
           6.10623e-016},{-14,22},{-2,22}}, color={0,0,127}));
@@ -88,7 +86,7 @@ The output <code>y</code> is bounded between <code>0</code> and <code>1</code>.
 For a more efficient implementation that approximates a motor, set in
 the valve or damper model the parameter <code>filteredOpening=true</code>
 instead of using this motor model.
-See also 
+See also
 <a href=\"modelica://Buildings.Fluid.Actuators.UsersGuide\">
 Buildings.Fluid.Actuators.UsersGuide</a>.
 </p>
@@ -96,7 +94,7 @@ Buildings.Fluid.Actuators.UsersGuide</a>.
 <ul>
 <li>
 September 8, 2008 by Michael Wetter:<br/>
-Added to instance <code>int</code> the attribute 
+Added to instance <code>int</code> the attribute
 <code>y(stateSelect=StateSelect.always)</code>. Without this attribute,
 the model <a href=\"modelica://Buildings.Fluid.Examples.TwoWayValves\">
 Buildings.Fluid.Examples.TwoWayValves</a> sets <code>y=3</code>
@@ -130,35 +128,27 @@ First implementation.
           textString="v"),
         Line(
           points={{-80,-74},{-8,-74}},
-          color={0,0,0},
           thickness=0.5),
         Line(
           points={{-8,22},{80,22}},
-          color={0,0,0},
           thickness=0.5),
         Line(
           points={{-50,-18},{-50,-74}},
-          color={0,0,0},
           thickness=0.5),
         Line(
           points={{30,22},{30,-18}},
-          color={0,0,0},
           thickness=0.5),
         Line(
           points={{-32,-69},{-22,-74},{-32,-79}},
-          color={0,0,0},
           thickness=0.5),
         Line(
           points={{16,27},{6,22},{16,17}},
-          color={0,0,0},
           thickness=0.5),
         Line(
           points={{-55,-46},{-50,-56},{-44,-46}},
-          color={0,0,0},
           thickness=0.5),
         Line(
           points={{25,-4},{30,7},{35,-4}},
-          color={0,0,0},
           thickness=0.5),
         Text(
           extent={{19,-35},{44,-18}},
@@ -170,11 +160,9 @@ First implementation.
           textString="-delta"),
         Line(
           points={{-8,22},{-8,-74}},
-          color={0,0,0},
           thickness=0.5),
         Line(
           points={{-50,-18},{30,-18}},
-          color={0,0,0},
           thickness=0.5),
         Text(
           extent={{-37,12},{-10,32}},
@@ -186,10 +174,8 @@ First implementation.
           textString="vClose"),
         Line(
           points={{-20,-13},{-30,-18},{-20,-23}},
-          color={0,0,0},
           thickness=0.5),
         Line(
           points={{6,-13},{16,-18},{6,-23}},
-          color={0,0,0},
           thickness=0.5)}));
 end IdealMotor;

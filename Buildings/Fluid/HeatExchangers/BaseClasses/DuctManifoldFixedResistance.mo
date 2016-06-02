@@ -8,7 +8,8 @@ model DuctManifoldFixedResistance
 
   parameter Modelica.SIunits.MassFlowRate m_flow_nominal
     "Mass flow rate at port_a"  annotation(Dialog(group = "Nominal Condition"));
-  parameter Modelica.SIunits.Pressure dp_nominal(min=0) "Pressure"
+  parameter Modelica.SIunits.PressureDifference dp_nominal(min=0, displayUnit="Pa")
+    "Pressure drop"
     annotation(Dialog(group = "Nominal Condition"));
   parameter Modelica.SIunits.Length dh=1 "Hydraulic diameter of duct"
         annotation(Dialog(enable= not linearized));
@@ -35,15 +36,15 @@ model DuctManifoldFixedResistance
     each ReC=ReC,
     each use_dh=use_dh,
     each linearized=linearized) "Fixed resistance for each duct"
-    annotation (Placement(transformation(extent={{-40,-10},{-20,10}},
-      rotation=0)));
+    annotation (Placement(transformation(extent={{-40,-10},{-20,10}})));
 protected
   DuctManifoldFlowDistributor floDis(
     redeclare package Medium = Medium,
     nPipPar=nPipPar,
     mStart_flow_a=mStart_flow_a,
     nPipSeg=nPipSeg,
-    allowFlowReversal=allowFlowReversal)
+    allowFlowReversal=allowFlowReversal,
+    m_flow_nominal=m_flow_nominal)
     "Mass flow distributor to the individual segments of the coil"
     annotation (Placement(transformation(extent={{40,-10},{60,10}})));
 equation
@@ -59,10 +60,7 @@ equation
       points={{60,0},{100,0}},
       color={0,127,255},
       smooth=Smooth.None));
-  annotation (Diagram(coordinateSystem(preserveAspectRatio=false, extent={{-100,
-            -100},{100,100}}),
-                      graphics),
-Documentation(info="<html>
+  annotation (Documentation(info="<html>
 <p>
 Duct manifold with a fixed flow resistance.
 </p>
@@ -81,6 +79,12 @@ stop with an error.
 </html>",
 revisions="<html>
 <ul>
+<li>
+January 22, 2016, by Michael Wetter:<br/>
+Corrected type declaration of pressure difference.
+This is
+for <a href=\"https://github.com/iea-annex60/modelica-annex60/issues/404\">#404</a>.
+</li>
 <li>
 June 29, 2014, by Michael Wetter:<br/>
 Added model that distributes the mass flow rate equally to each

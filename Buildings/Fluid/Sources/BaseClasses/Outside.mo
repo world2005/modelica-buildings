@@ -6,28 +6,35 @@ partial model Outside
     "Get the trace substances from the input connector"
     annotation(Evaluate=true, HideResult=true);
   parameter Medium.ExtraProperty C[Medium.nC](
-       quantity=Medium.extraPropertiesNames)=fill(0, Medium.nC)
+    final quantity=Medium.extraPropertiesNames)=fill(0, Medium.nC)
     "Fixed values of trace substances"
     annotation (Dialog(enable = (not use_C_in) and Medium.nC > 0));
-  Modelica.Blocks.Interfaces.RealInput C_in[Medium.nC] if use_C_in
+
+  Modelica.Blocks.Interfaces.RealInput C_in[Medium.nC](
+    final quantity=Medium.extraPropertiesNames) if use_C_in
     "Prescribed boundary trace substances"
-    annotation (Placement(transformation(extent={{-140,-100},{-100,-60}},
-          rotation=0)));
+    annotation (Placement(transformation(extent={{-140,-100},{-100,-60}})));
+
   Buildings.BoundaryConditions.WeatherData.Bus weaBus "Bus with weather data"
     annotation (Placement(transformation(extent={{-110,-10},{-90,10}}),
         iconTransformation(extent={{-120,-18},{-80,22}})));
 protected
-  final parameter Boolean singleSubstance = ( Medium.nX == 1)
+  final parameter Boolean singleSubstance = (Medium.nX == 1)
     "True if single substance medium";
-  Buildings.Utilities.Psychrometrics.X_pTphi x_pTphi if
-       not singleSubstance "Block to compute water vapor concentration";
-  Modelica.Blocks.Interfaces.RealInput X_in_internal[Medium.nX]
+  Buildings.Utilities.Psychrometrics.X_pTphi x_pTphi
+    if not singleSubstance "Block to compute water vapor concentration";
+
+  Modelica.Blocks.Interfaces.RealInput X_in_internal[Medium.nX](
+    each final unit="kg/kg",
+    final quantity=Medium.substanceNames)
     "Needed to connect to conditional connector";
-  Modelica.Blocks.Interfaces.RealInput T_in_internal
+  Modelica.Blocks.Interfaces.RealInput T_in_internal(final unit="K",
+                                                     displayUnit="degC")
     "Needed to connect to conditional connector";
-  Modelica.Blocks.Interfaces.RealInput p_in_internal
+  Modelica.Blocks.Interfaces.RealInput p_in_internal(final unit="Pa")
     "Needed to connect to conditional connector";
-  Modelica.Blocks.Interfaces.RealInput C_in_internal[Medium.nC]
+  Modelica.Blocks.Interfaces.RealInput C_in_internal[Medium.nC](
+       quantity=Medium.extraPropertiesNames)
     "Needed to connect to conditional connector";
 
 equation
@@ -86,14 +93,14 @@ equation
     Documentation(info="<html>
 <p>
 This is the base class for models that describes boundary conditions for
-pressure, enthalpy, and species concentration that can be obtained 
+pressure, enthalpy, and species concentration that can be obtained
 from weather data, and that may be modified based on the wind pressure.
 </p>
-<p>If the parameter <code>use_C_in</code> is <code>false</code> (default option), 
+<p>If the parameter <code>use_C_in</code> is <code>false</code> (default option),
 the <code>C</code> parameter
-is used as the trace substance for flow that leaves the component, and the 
-<code>C_in</code> input connector is disabled; if <code>use_C_in</code> is <code>true</code>, 
-then the <code>C</code> parameter is ignored, and the value provided by the input connector is used instead.</p> 
+is used as the trace substance for flow that leaves the component, and the
+<code>C_in</code> input connector is disabled; if <code>use_C_in</code> is <code>true</code>,
+then the <code>C</code> parameter is ignored, and the value provided by the input connector is used instead.</p>
 <p>
 Note that boundary temperature,
 mass fractions and trace substances have only an effect if the mass flow
@@ -104,6 +111,16 @@ with exception of boundary pressure, do not have an effect.
 </html>",
 revisions="<html>
 <ul>
+<li>
+April, 25, 2016 by Marcus Fuchs:<br/>
+Introduced missing <code>each</code> keyword. This is for
+<a href=\"https://github.com/iea-annex60/modelica-annex60/issues/454\"> #454</a>,
+to prevent a warning in OpenModelica.
+</li>
+<li>
+January 26, 2016, by Michael Wetter:<br/>
+Added <code>unit</code> and <code>quantity</code> attributes.
+</li>
 <li>
 May 30, 2014, by Michael Wetter:<br/>
 Removed undesirable annotation <code>Evaluate=true</code>.
@@ -121,9 +138,5 @@ Feb. 9, 2011 by Michael Wetter:<br/>
 First implementation.
 </li>
 </ul>
-</html>"),
-    Diagram(coordinateSystem(
-        preserveAspectRatio=false,
-        extent={{-100,-100},{100,100}},
-        grid={2,2})));
+</html>"));
 end Outside;

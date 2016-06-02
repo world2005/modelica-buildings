@@ -1,5 +1,4 @@
 UsersGuide
-Conversions
 Density
 DensityTwoPort
 EnthalpyFlowRate
@@ -7,6 +6,8 @@ LatentEnthalpyFlowRate
 MassFlowRate
 MassFraction
 MassFractionTwoPort
+PPM
+PPMTwoPort
 Pressure
 RelativeHumidity
 RelativeHumidityTwoPort
@@ -23,5 +24,6 @@ TemperatureWetBulbTwoPort
 TraceSubstances
 TraceSubstancesTwoPort
 VolumeFlowRate
+Conversions
 Examples
 BaseClasses

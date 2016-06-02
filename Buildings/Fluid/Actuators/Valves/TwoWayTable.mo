@@ -1,6 +1,6 @@
 within Buildings.Fluid.Actuators.Valves;
-model TwoWayTable "Two way valve with linear flow characteristics"
-  extends BaseClasses.PartialTwoWayValve(
+model TwoWayTable "Two way valve with table-specified flow characteristics"
+  extends BaseClasses.PartialTwoWayValveKv(
     phi=phiLooUp.y[1],
     final l = phiLooUp.table[1, 2]);
   parameter Data.Generic flowCharacteristics "Table with flow characteristics"
@@ -23,9 +23,14 @@ protected
     annotation (Placement(transformation(extent={{70,60},{90,80}})));
 
 initial equation
-  assert(flowCharacteristics.y[1] == 0, "flowCharateristics.y[1] must be 0.");
-  assert(flowCharacteristics.y[size(flowCharacteristics.y, 1)] == 1, "flowCharateristics.y[end] must be 1.");
-  assert(flowCharacteristics.phi[size(flowCharacteristics.phi, 1)] == 1, "flowCharateristics.phi[end] must be 1.");
+  assert(abs(flowCharacteristics.y[1]) < Modelica.Constants.eps,
+    "flowCharateristics.y[1] must be 0.");
+  assert(abs(flowCharacteristics.y[size(flowCharacteristics.y, 1)] - 1) <
+    Modelica.Constants.eps,
+    "flowCharateristics.y[end] must be 1.");
+  assert(abs(flowCharacteristics.phi[size(flowCharacteristics.phi, 1)] - 1) <
+    Modelica.Constants.eps,
+    "flowCharateristics.phi[end] must be 1.");
 
   // Assert that the sequences are strictly monotonic increasing
   assert(Buildings.Utilities.Math.Functions.isMonotonic(
@@ -40,8 +45,7 @@ initial equation
 equation
   connect(phiLooUp.u[1], y_actual) annotation (Line(
       points={{68,70},{50,70}},
-      color={0,0,127},
-      smooth=Smooth.None));
+      color={0,0,127}));
   annotation (
     defaultComponentName="val",
     Documentation(info="<html>
@@ -57,7 +61,7 @@ scaled by the values of the parameter
 <code>flowCharacteristics</code>.
 The parameter <code>flowCharacteristics</code> declares a table of the form
 </p>
-<table summary=\"summary\" border=\"1\" cellspacing=0 cellpadding=2 style=\"border-collapse:collapse;\">
+<table summary=\"summary\" border=\"1\" cellspacing=\"0\" cellpadding=\"2\" style=\"border-collapse:collapse;\">
 <tr>
 <td><i>y</i></td>  <td>0</td>  <td>...</td>  <td>1</td>
 </tr>
@@ -72,7 +76,7 @@ mass flow rate, relative to the mass flow rate of the fully open
 valve, under the assumption of a constant pressure difference across the
 valve.
 A suggested value for the valve leakage is <i>l=0.0001</i>.
-If <i>l = 0</i>, then this model will replace it with 
+If <i>l = 0</i>, then this model will replace it with
 <i>l = 10<sup>-8</sup></i> for numerical reasons.
 For example, if a valve has <i>K<sub>v</sub>=0.5</i> [m<sup>3</sup>/h/bar<sup>1/2</sup>] and
 a linear opening characteristics and
@@ -84,7 +88,7 @@ a valve leakage of <i>l=0.0001</i>, then one would set
  flowCharacteristics(y={0,1}, phi={0.0001,1})
  </pre>
 <p>
-Note, however, that 
+Note, however, that
 <a href=\"modelica://Buildings.Fluid.Actuators.Valves.TwoWayLinear\">
 Buildings.Fluid.Actuators.Valves.TwoWayLinear</a> provides a more
 efficient implementation for this simple case.
@@ -95,7 +99,7 @@ requirements, otherwise the model stops with an error:
 </p>
 <ul>
 <li>
-The arrays in 
+The arrays in
 <code>flowCharacteristics.y</code> and <code>flowCharacteristics.phi</code>
 must be strictly monotonic increasing.
 </li>
@@ -113,9 +117,9 @@ The last values must satisfy
 </li>
 </ul>
 <p>
-This model is based on the partial valve model 
+This model is based on the partial valve model
 <a href=\"modelica://Buildings.Fluid.Actuators.BaseClasses.PartialTwoWayValve\">
-Buildings.Fluid.Actuators.BaseClasses.PartialTwoWayValve</a>. 
+Buildings.Fluid.Actuators.BaseClasses.PartialTwoWayValve</a>.
 Check this model for more information, such
 as the regularization near the origin.
 </p>
@@ -126,6 +130,11 @@ Buildings.Fluid.Actuators.Valves.Examples.TwoWayValveTable</a>.
 </p>
 </html>", revisions="<html>
 <ul>
+<li>
+January 26, 2016, by Michael Wetter:<br/>
+Removed equality comparison for <code>Real</code> in the
+<code>assert</code> statements as this is not allowed in Modelica.
+</li>
 <li>
 August 12, 2014, by Michael Wetter:<br/>
 Removed the <code>end</code> keyword when accessing array elements,
@@ -144,8 +153,6 @@ First implementation.
 </li>
 </ul>
 </html>"),
-    Diagram(coordinateSystem(preserveAspectRatio=false, extent={{-100,-100},{
-            100,100}}), graphics),
     Icon(coordinateSystem(preserveAspectRatio=false, extent={{-100,-100},{100,
             100}}), graphics={
         Rectangle(
@@ -156,15 +163,9 @@ First implementation.
           extent={{-12,-11},{12,11}},
           radius=5.0),
         Line(
-          points={{-70,94},{-70,72}},
-          color={0,0,0},
-          smooth=Smooth.None),
+          points={{-70,94},{-70,72}}),
         Line(
-          points={{-82,86},{-58,86}},
-          color={0,0,0},
-          smooth=Smooth.None),
+          points={{-82,86},{-58,86}}),
         Line(
-          points={{-82,78},{-58,78}},
-          color={0,0,0},
-          smooth=Smooth.None)}));
+          points={{-82,78},{-58,78}})}));
 end TwoWayTable;

@@ -40,7 +40,7 @@ model StratifiedEnhancedInternalHex
     "Nominal mass flow rate through the heat exchanger"
     annotation(Dialog(group="Heat exchanger"));
 
-  parameter Modelica.SIunits.Pressure dpHex_nominal(displayUnit="Pa") = 2500
+  parameter Modelica.SIunits.PressureDifference dpHex_nominal(displayUnit="Pa") = 2500
     "Pressure drop across the heat exchanger at nominal conditions"
     annotation(Dialog(group="Heat exchanger"));
 
@@ -62,10 +62,13 @@ model StratifiedEnhancedInternalHex
 
   parameter Modelica.Fluid.Types.Dynamics energyDynamicsHex=
     Modelica.Fluid.Types.Dynamics.DynamicFreeInitial
-    "Formulation of energy balance"
+    "Formulation of energy balance for heat exchanger internal fluid mass"
     annotation(Evaluate=true, Dialog(tab = "Dynamics heat exchanger", group="Equations"));
   parameter Modelica.Fluid.Types.Dynamics massDynamicsHex=
-    energyDynamicsHex "Formulation of mass balance"
+    energyDynamicsHex "Formulation of mass balance for heat exchanger"
+    annotation(Evaluate=true, Dialog(tab = "Dynamics heat exchanger", group="Equations"));
+  parameter Modelica.Fluid.Types.Dynamics energyDynamicsHexSolid=energyDynamicsHex
+    "Formulation of energy balance for heat exchanger solid mass"
     annotation(Evaluate=true, Dialog(tab = "Dynamics heat exchanger", group="Equations"));
 
   parameter Modelica.SIunits.Length lHex=
@@ -90,17 +93,25 @@ model StratifiedEnhancedInternalHex
     ACroHex*lHex*dHex*cHex
     "Capacitance of the heat exchanger without the fluid"
     annotation(Dialog(tab = "Dynamics heat exchanger", group="Equations"));
-
+  parameter Boolean allowFlowReversalHex = true
+    "= true to allow flow reversal in heat exchanger, false restricts to design direction (portHex_a -> portHex_b)"
+    annotation(Dialog(tab="Assumptions", group="Heat exchanger"), Evaluate=true);
   Modelica.Fluid.Interfaces.FluidPort_a portHex_a(
-    redeclare final package Medium =MediumHex) "Heat exchanger inlet"
+    redeclare final package Medium =MediumHex,
+     m_flow(min=if allowFlowReversalHex then -Modelica.Constants.inf else 0))
+    "Heat exchanger inlet"
    annotation (Placement(transformation(extent={{-110,-48},{-90,-28}}),
                    iconTransformation(extent={{-110,-48},{-90,-28}})));
   Modelica.Fluid.Interfaces.FluidPort_b portHex_b(
-     redeclare final package Medium = MediumHex) "Heat exchanger outlet"
+     redeclare final package Medium = MediumHex,
+     m_flow(max=if allowFlowReversalHex then Modelica.Constants.inf else 0))
+    "Heat exchanger outlet"
    annotation (Placement(transformation(extent={{-110,-90},{-90,-70}}),
         iconTransformation(extent={{-110,-90},{-90,-70}})));
 
   BaseClasses.IndirectTankHeatExchanger indTanHex(
+    redeclare final package MediumTan = Medium,
+    redeclare final package MediumHex = MediumHex,
     final nSeg=nSegHex,
     final CHex=CHex,
     final volHexFlu=volHexFlu,
@@ -109,23 +120,26 @@ model StratifiedEnhancedInternalHex
     final THex_nominal=THex_nominal,
     final r_nominal=r_nominal,
     final dExtHex=dExtHex,
-    redeclare final package MediumTan = Medium,
-    redeclare final package MediumHex = MediumHex,
     final dp_nominal=dpHex_nominal,
     final m_flow_nominal=mHex_flow_nominal,
     final energyDynamics=energyDynamicsHex,
+    final energyDynamicsSolid=energyDynamicsHexSolid,
     final massDynamics=massDynamicsHex,
-    m_flow_small=1e-4*abs(mHex_flow_nominal),
     final computeFlowResistance=computeFlowResistance,
     from_dp=from_dp,
     final linearizeFlowResistance=linearizeFlowResistance,
-    final deltaM=deltaM) "Heat exchanger inside the tank"
+    final deltaM=deltaM,
+    final allowFlowReversal=allowFlowReversalHex,
+    final m_flow_small=1e-4*abs(mHex_flow_nominal))
+    "Heat exchanger inside the tank"
      annotation (Placement(
         transformation(
         extent={{-10,-15},{10,15}},
         rotation=180,
         origin={-87,32})));
 
+  Modelica.SIunits.HeatFlowRate QHex_flow = -sum(indTanHex.port.Q_flow)
+    "Heat transfered from the heat exchanger to the tank";
 protected
   final parameter Integer segHex_a = nSeg-integer(hHex_a/segHeight)
     "Tank segment in which port a1 of the heat exchanger is located in"
@@ -151,6 +165,7 @@ protected
 
   final parameter Integer nSegHex = nSegHexTan*hexSegMult
     "Number of heat exchanger segments";
+
 initial equation
   assert(hHex_a >= 0 and hHex_a <= hTan,
     "The parameter hHex_a is outside its valid range.");
@@ -171,11 +186,11 @@ equation
      end for;
    end for;
   connect(portHex_a, indTanHex.port_a) annotation (Line(
-      points={{-100,-38},{-74,-38},{-74,32},{-77,32}},
+      points={{-100,-38},{-68,-38},{-68,32},{-77,32}},
       color={0,127,255},
       smooth=Smooth.None));
   connect(indTanHex.port_b, portHex_b) annotation (Line(
-      points={{-97,32},{-100,32},{-100,20},{-76,20},{-76,-80},{-100,-80}},
+      points={{-97,32},{-98,32},{-98,18},{-70,18},{-70,-80},{-100,-80}},
       color={0,127,255},
       smooth=Smooth.None));
 
@@ -219,15 +234,13 @@ equation
           pattern=LinePattern.None,
           fillColor={255,85,85},
           fillPattern=FillPattern.Solid)}),
-              Diagram(coordinateSystem(preserveAspectRatio=false, extent={{-100,
-            -100},{100,100}}), graphics),
 defaultComponentName = "tan",
 Documentation(info = "<html>
 <p>
 This is a model of a stratified storage tank for thermal energy storage with built-in heat exchanger.
 </p>
 <p>
-See the 
+See the
 <a href=\"modelica://Buildings.Fluid.Storage.UsersGuide\">
 Buildings.Fluid.Storage.UsersGuide</a>
 for more information.
@@ -237,12 +250,36 @@ for more information.
 The model requires at least 4 fluid segments. Hence, set <code>nSeg</code> to 4 or higher.
 </p>
 </html>",
-revisions = "<html>
+revisions="<html>
 <ul>
+<li>
+January 22, 2016, by Michael Wetter:<br/>
+Corrected type declaration of pressure difference.
+This is
+for <a href=\"https://github.com/iea-annex60/modelica-annex60/issues/404\">#404</a>.
+</li>
+<li>
+July 2, 2015, by Michael Wetter:<br/>
+Set the default value <code>energyDynamicsHexSolid=energyDynamicsHex</code>
+rather than
+<code>energyDynamicsHexSolid=Modelica.Fluid.Types.Dynamics.DynamicFreeInitial</code>
+as users are not likely to want different settings.
+</li>
+<li>
+July 1, 2015, by Filip Jorissen:<br/>
+Added parameter <code>energyDynamicsHexSolid</code>.
+This is for
+<a href=\"https://github.com/lbl-srg/modelica-buildings/issues/434\">
+#434</a>.
+</li>
+<li>
+March 28, 2015, by Filip Jorissen:<br/>
+Propagated <code>allowFlowReversal</code> and <code>m_flow_small</code>.
+</li>
 <li>
 September 2, 2014 by Michael Wetter:<br/>
 Replaced the <code>abs()</code> function in the assignment of the parameter
-<code>nSegHexTan</code> as the return value of <code>abs()</code> 
+<code>nSegHexTan</code> as the return value of <code>abs()</code>
 is a <code>Real</code> which causes a type error during model check.
 </li>
 <li>
@@ -250,7 +287,7 @@ August 29, 2014 by Michael Wetter:<br/>
 Corrected issue <a href=\"https://github.com/lbl-srg/modelica-buildings/issues/271\">#271</a>
 which led to a compilation error if the heat exchanger and the tank
 had different media.
-</li> 
+</li>
 <li>
 April 18, 2014 by Michael Wetter:<br/>
 Added missing ceiling function in computation of <code>botHexSeg</code>.
@@ -258,8 +295,8 @@ Without this function, this parameter can take on zero, which is wrong
 because the Modelica uses one-based arrays.
 
 Revised the model as the old version required the port<sub>a</sub>
-of the heat exchanger to be located higher than port<sub>b</sub>. 
-This makes sense if the heat exchanger is used to heat up the tank, 
+of the heat exchanger to be located higher than port<sub>b</sub>.
+This makes sense if the heat exchanger is used to heat up the tank,
 but not if it is used to cool down a tank, such as in a cooling plant.
 The following parameters were changed:
 <ol>
@@ -275,7 +312,7 @@ The names of the following ports have been changed:
 <li>Changed <code>port_a1</code> to <code>portHex_a</code>.</li>
 <li>Changed <code>port_b1</code> to <code>portHex_b</code>.</li>
 </ol>
-The conversion script should update old instances of 
+The conversion script should update old instances of
 this model automatically in Dymola for all of the above changes.
 </li>
 <li>

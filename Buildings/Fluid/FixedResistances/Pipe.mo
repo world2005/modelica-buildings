@@ -3,7 +3,7 @@ model Pipe "Pipe with finite volume discretization along flow path"
   extends Buildings.Fluid.FixedResistances.BaseClasses.Pipe(
    diameter=sqrt(4*m_flow_nominal/rho_default/v_nominal/Modelica.Constants.pi),
    dp_nominal=2*dpStraightPipe_nominal,
-   res(dp(nominal=length*10)));
+   preDro(dp(nominal=length*10)));
   // Because dp_nominal is a non-literal value, we set
   // dp.nominal=100 instead of the default dp.nominal=dp_nominal,
   // because the latter is ignored by Dymola 2012 FD 01.
@@ -12,7 +12,7 @@ model Pipe "Pipe with finite volume discretization along flow path"
     "Velocity at m_flow_nominal (used to compute default diameter)";
   parameter Modelica.SIunits.Length roughness(min=0) = 2.5e-5
     "Absolute roughness of pipe, with a default for a smooth steel pipe (dummy if use_roughness = false)";
-  final parameter Modelica.SIunits.Pressure dpStraightPipe_nominal=
+  final parameter Modelica.SIunits.PressureDifference dpStraightPipe_nominal(displayUnit="Pa")=
       Modelica.Fluid.Pipes.BaseClasses.WallFriction.Detailed.pressureLoss_m_flow(
       m_flow=m_flow_nominal,
       rho_a=rho_default,
@@ -52,7 +52,6 @@ model Pipe "Pipe with finite volume discretization along flow path"
     annotation (Placement(transformation(extent={{-10,-70},{11,-50}}),
         iconTransformation(extent={{-30,-60},{30,-40}})));
 equation
-
   connect(conPipWal.port_b, vol.heatPort) annotation (Line(
       points={{-8,-28},{-1,-28}},
       color={191,0,0},
@@ -74,19 +73,32 @@ equation
 
   end if;
   annotation (
-    Icon(graphics),
     defaultComponentName="pip",
     Documentation(info="<html>
 <p>
 Model of a pipe with flow resistance and optional heat exchange with environment.
 </p>
+<h4>Heat loss calculation</h4>
 <p>
-If <code>useMultipleHeatPorts=false</code> (default option), the pipe uses a single heat port 
-for the heat exchange with the environment.
-If <code>useMultipleHeatPorts=true</code>, then one heat port for each segment of the pipe is
+There are two possible configurations:
+</p>
+<ol>
+<li>
+If <code>useMultipleHeatPorts=false</code> (default option), the pipe uses a single heat port
+for the heat exchange with the environment. Note that if the heat port
+is unconnected, then all volumes are still connected through the heat conduction elements
+<code>conPipWal</code>.
+Therefore, they exchange a small amount of heat, which is not physical.
+To avoid this, set <code>useMultipleHeatPorts=true</code>.
+</li>
+<li>
+If <code>useMultipleHeatPorts=true</code>,
+then one heat port for each segment of the pipe is
 used for the heat exchange with the environment.
 If the heat port is unconnected, then the pipe has no heat loss.
-</p>
+</li>
+</ol>
+<h4>Pressure drop calculation</h4>
 <p>
 The default value for the parameter <code>diameter</code> is computed such that the flow velocity
 is equal to <code>v_nominal=0.15</code> for a mass flow rate of <code>m_flow_nominal</code>.
@@ -95,11 +107,11 @@ by the user.
 The default value for <code>dp_nominal</code> is two times the pressure drop that the pipe
 would have if it were straight with no fittings.
 The factor of two that takes into account the pressure loss of fittings can be overwritten.
-These fittings could also be explicitely modeled outside of this component using models from
+These fittings could also be explicitly modeled outside of this component using models from
 the package
 <a href=\"modelica://Modelica.Fluid.Fittings\">
 Modelica.Fluid.Fittings</a>.
-For mass flow rates other than <code>m_flow_nominal</code>, the model 
+For mass flow rates other than <code>m_flow_nominal</code>, the model
 <a href=\"modelica://Buildings.Fluid.FixedResistances.FixedResistanceDpM\">
 Buildings.Fluid.FixedResistances.FixedResistanceDpM</a> is used to
 compute the pressure drop.
@@ -112,13 +124,29 @@ Buildings.Fluid.FixedResistances.FixedResistanceDpM</a> instead of this model.
 </html>", revisions="<html>
 <ul>
 <li>
+January 22, 2016, by Michael Wetter:<br/>
+Corrected type declaration of pressure difference.
+This is
+for <a href=\"https://github.com/iea-annex60/modelica-annex60/issues/404\">#404</a>.
+</li>
+<li>
+October 30, 2015, by Michael Wetter:<br/>
+Improved documentation for
+<a href=\"https://github.com/lbl-srg/modelica-buildings/issues/455\">#455</a>.
+</li>
+<li>
+February 5, 2015, by Michael Wetter:<br/>
+Renamed <code>res</code> to <code>preDro</code> for
+<a href=\"https://github.com/lbl-srg/modelica-buildings/issues/292\">#292</a>.
+</li>
+<li>
 September 13, 2013 by Michael Wetter:<br/>
 Replaced <code>nominal</code> with <code>default</code> values
 as they are computed using the default Medium values.
 </li>
 <li>
 February 22, 2012 by Michael Wetter:<br/>
-Renamed <code>useMultipleHeatPort</code> to <code>useMultipleHeatPorts</code> and 
+Renamed <code>useMultipleHeatPort</code> to <code>useMultipleHeatPorts</code> and
 used heat port connector from <code>Modelica.Fluid</code> package for vector of heat ports.
 </li>
 <li>

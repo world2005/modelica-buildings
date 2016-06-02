@@ -1,7 +1,7 @@
 within Buildings.Fluid.Sensors.Conversions.Examples;
 model To_VolumeFraction "Example problem for conversion model"
   extends Modelica.Icons.Example;
-  package Medium = Buildings.Media.GasesPTDecoupled.SimpleAir(extraPropertiesNames={"CO2"});
+  package Medium = Buildings.Media.Air(extraPropertiesNames={"CO2"});
 
   Buildings.Fluid.Sensors.Conversions.To_VolumeFraction conMasVolFra(MMMea=
         Modelica.Media.IdealGases.Common.SingleGasesData.CO2.MM)
@@ -49,7 +49,6 @@ model To_VolumeFraction "Example problem for conversion model"
     nPorts=1) "Sink for exhaust air"                        annotation (
       Placement(transformation(
         extent={{10,-10},{-10,10}},
-        rotation=0,
         origin={170,40})));
   Modelica.Blocks.Math.Gain gai(k=50/3600) "Gain for mass flow rate"
     annotation (Placement(transformation(extent={{-60,-20},{-40,0}})));
@@ -79,8 +78,7 @@ model To_VolumeFraction "Example problem for conversion model"
     initType=Modelica.Blocks.Types.Init.InitialState)
     "CO2 concentration in fresh air supply"
     annotation (Placement(transformation(extent={{60,-20},{80,0}})));
-  inner Modelica.Fluid.System system
-    annotation (Placement(transformation(extent={{-180,60},{-160,80}})));
+
   Buildings.Fluid.FixedResistances.FixedResistanceDpM res(
     redeclare package Medium = Medium,
     dp_nominal=10,
@@ -91,76 +89,58 @@ equation
 
   connect(souCO2.m_flow_in, CO2Per.y) annotation (Line(
       points={{-22.1,70},{-39,70}},
-      color={0,0,127},
-      smooth=Smooth.None));
+      color={0,0,127}));
   connect(gai.y, sou.m_flow_in) annotation (Line(
       points={{-39,-10},{-30,-10},{-30,-2},{-20,-2}},
-      color={0,0,127},
-      smooth=Smooth.None));
+      color={0,0,127}));
   connect(limPID.y, gai.u) annotation (Line(
       points={{-79,-10},{-62,-10}},
-      color={0,0,127},
-      smooth=Smooth.None));
+      color={0,0,127}));
   connect(nPeo.y, CO2Per.u) annotation (Line(
       points={{-79,70},{-62,70}},
-      color={0,0,127},
-      smooth=Smooth.None));
+      color={0,0,127}));
   connect(sou.ports[1], senVolFlo.port_a) annotation (Line(
       points={{5.55112e-16,-10},{20,-10}},
-      color={0,127,255},
-      smooth=Smooth.None));
+      color={0,127,255}));
   connect(senCO2.C, conMasVolFra.m) annotation (Line(
       points={{141,10},{147,10}},
-      color={0,0,127},
-      smooth=Smooth.None));
+      color={0,0,127}));
   connect(conMasVolFra.V, norMea.u) annotation (Line(
       points={{169,10},{180,10},{180,-80},{-152,-80},{-152,-50},{-142,-50}},
-      color={0,0,127},
-      smooth=Smooth.None));
+      color={0,0,127}));
   connect(norMea.y, limPID.u_m) annotation (Line(
       points={{-119,-50},{-90,-50},{-90,-22}},
-      color={0,0,127},
-      smooth=Smooth.None));
+      color={0,0,127}));
   connect(volFra.y, norSet.u) annotation (Line(
       points={{-159,-10},{-142,-10}},
-      color={0,0,127},
-      smooth=Smooth.None));
+      color={0,0,127}));
   connect(norSet.y, limPID.u_s) annotation (Line(
       points={{-119,-10},{-102,-10}},
-      color={0,0,127},
-      smooth=Smooth.None));
+      color={0,0,127}));
   connect(conVolFlo.u, senVolFlo.V_flow) annotation (Line(
       points={{38,30},{30,30},{30,1}},
-      color={0,0,127},
-      smooth=Smooth.None));
+      color={0,0,127}));
   connect(souCO2.ports[1], senTraSubPeo.port_a) annotation (Line(
       points={{5.55112e-16,70},{40,70}},
-      color={0,127,255},
-      smooth=Smooth.None));
+      color={0,127,255}));
   connect(senTraSubPeo.port_b, vol.ports[1]) annotation (Line(
       points={{60,70},{82,70},{82,50},{97,50},{97,60}},
-      color={0,127,255},
-      smooth=Smooth.None));
+      color={0,127,255}));
   connect(senVolFlo.port_b, senTraSubFre.port_a) annotation (Line(
       points={{40,-10},{60,-10}},
-      color={0,127,255},
-      smooth=Smooth.None));
+      color={0,127,255}));
   connect(senTraSubFre.port_b, vol.ports[2]) annotation (Line(
       points={{80,-10},{99,-10},{99,60}},
-      color={0,127,255},
-      smooth=Smooth.None));
+      color={0,127,255}));
   connect(vol.ports[3], senCO2.port) annotation (Line(
       points={{101,60},{101,-10},{130,-10},{130,-5.55112e-16}},
-      color={0,127,255},
-      smooth=Smooth.None));
+      color={0,127,255}));
   connect(vol.ports[4], res.port_a) annotation (Line(
       points={{103,60},{102,60},{102,38},{122,38},{122,40}},
-      color={0,127,255},
-      smooth=Smooth.None));
+      color={0,127,255}));
   connect(res.port_b, sin.ports[1]) annotation (Line(
       points={{142,40},{160,40}},
-      color={0,127,255},
-      smooth=Smooth.None));
+      color={0,127,255}));
   annotation (
 experiment(StopTime=36000),
 __Dymola_Commands(file="modelica://Buildings/Resources/Scripts/Dymola/Fluid/Sensors/Conversions/Examples/To_VolumeFraction.mos"
@@ -170,7 +150,7 @@ __Dymola_Commands(file="modelica://Buildings/Resources/Scripts/Dymola/Fluid/Sens
 This example demonstrates the modeling of a room with one person and CO<sub>2</sub> control.
 The room has a volume of <i>4*4*2.7 m<sup>3</sup></i>, and the CO<sub>2</sub> inflow is from
 one person.
-A control system regulates the outside air to maintain a CO<sub>2</sub> concentration of 1000 PPM 
+A control system regulates the outside air to maintain a CO<sub>2</sub> concentration of 1000 PPM
 in the room. The outside air has a CO<sub>2</sub> concentration of 300 PPM.
 Note that for simplicity, we allow zero outside air flow rate if the CO<sub>2</sub> concentration is below
 the setpoint, which does not comply with ASHRAE regulations.

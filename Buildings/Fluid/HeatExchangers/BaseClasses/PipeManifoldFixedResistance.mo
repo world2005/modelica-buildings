@@ -6,7 +6,9 @@ model PipeManifoldFixedResistance
   parameter Modelica.SIunits.MassFlowRate m_flow_nominal
     "Mass flow rate at port_a"
     annotation(Dialog(group = "Nominal Condition"));
-  parameter Modelica.SIunits.Pressure dp_nominal(min=0) "Pressure"
+  parameter Modelica.SIunits.PressureDifference dp_nominal(min=0,
+                                                           displayUnit="Pa")
+    "Pressure drop"
      annotation(Dialog(group = "Nominal Condition"));
 
   parameter Boolean use_dh = false "Set to true to specify hydraulic diameter"
@@ -36,7 +38,7 @@ model PipeManifoldFixedResistance
     ReC=ReC,
     use_dh=use_dh,
     linearized=linearized) "Fixed resistance for each duct"
-    annotation (Placement(transformation(extent={{-40,-10},{-20,10}},rotation=0)));
+    annotation (Placement(transformation(extent={{-40,-10},{-20,10}})));
 protected
   PipeManifoldFlowDistributor floDis(
     redeclare package Medium = Medium,
@@ -58,10 +60,7 @@ equation
       points={{-40,0},{-100,0}},
       color={0,127,255},
       smooth=Smooth.None));
-annotation (Diagram(coordinateSystem(preserveAspectRatio=false, extent={{-100,
-            -100},{100,100}}),
-                    graphics),
-Documentation(info="<html>
+annotation (Documentation(info="<html>
 <p>
 Pipe manifold with a fixed flow resistance.
 </p>
@@ -80,6 +79,12 @@ stop with an error.
 </html>",
 revisions="<html>
 <ul>
+<li>
+January 22, 2016, by Michael Wetter:<br/>
+Corrected type declaration of pressure difference.
+This is
+for <a href=\"https://github.com/iea-annex60/modelica-annex60/issues/404\">#404</a>.
+</li>
 <li>
 June 29, 2014, by Michael Wetter:<br/>
 Added model that distributes the mass flow rate equally to each

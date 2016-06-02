@@ -1,7 +1,9 @@
+CheckBlackBodySkyTemperature
 CheckCeilingHeight
+CheckIRRadiation
+CheckPressure
 CheckRadiation
 CheckRelativeHumidity
-CheckPressure
 CheckSkyCover
 CheckTemperature
 CheckWindDirection
@@ -11,7 +13,6 @@ ConvertRelativeHumidity
 ConvertTime
 EquationOfTime
 LocalCivilTime
-SolarSubBus
 SolarTime
 getAbsolutePath
 getHeaderElementTMY3
@@ -19,4 +20,3 @@ getLatitudeTMY3
 getLongitudeTMY3
 getTimeZoneTMY3
 Examples
-

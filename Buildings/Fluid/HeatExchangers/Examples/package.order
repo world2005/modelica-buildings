@@ -1,4 +1,5 @@
-ConstantEffectiveness
+AirHeater_T
+AirHeater_u
 DryCoilCounterFlowMassFlow
 DryCoilCounterFlowPControl
 DryCoilDiscretized
@@ -6,11 +7,9 @@ DryCoilDiscretizedPControl
 DryEffectivenessNTU
 DryEffectivenessNTUMassFlow
 DryEffectivenessNTUPControl
-HeaterCoolerPrescribed
+WaterHeater_T
+WaterHeater_u
 WetCoilCounterFlowMassFlow
 WetCoilCounterFlowPControl
-WetCoilDiscretizedGasesConstantDensity
-WetCoilDiscretizedGasesPTDecoupled
 WetCoilDiscretizedPControl
-WetCoilDiscretizedPerfectGases
 BaseClasses

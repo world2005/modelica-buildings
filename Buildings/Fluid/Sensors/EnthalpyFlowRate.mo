@@ -2,7 +2,7 @@ within Buildings.Fluid.Sensors;
 model EnthalpyFlowRate "Ideal enthalphy flow rate sensor"
   extends Buildings.Fluid.Sensors.BaseClasses.PartialDynamicFlowSensor;
   extends Modelica.Icons.RotationalSensor;
-  Modelica.Blocks.Interfaces.RealOutput H_flow(unit="W")
+  Modelica.Blocks.Interfaces.RealOutput H_flow(final unit="W")
     "Enthalpy flow rate, positive if from port_a to port_b"
     annotation (Placement(transformation(
         origin={0,110},
@@ -41,15 +41,13 @@ equation
   end if;
   // Specific enthalpy measured by sensor
   if dynamic then
-    der(h_out) = (hMed_out-h_out)*k/tau;
+    der(h_out) = (hMed_out-h_out)*k*tauInv;
   else
     h_out = hMed_out;
   end if;
   // Sensor output signal
   H_flow = port_a.m_flow * h_out;
 annotation (defaultComponentName="senEntFlo",
-  Diagram(coordinateSystem(preserveAspectRatio=true,  extent={{-100,-100},{100,
-            100}})),
   Icon(graphics={
         Line(points={{-100,0},{-70,0}}, color={0,128,255}),
         Line(points={{70,0},{100,0}}, color={0,128,255}),
@@ -65,10 +63,10 @@ between fluid ports. The sensor is ideal, i.e., it does not influence the fluid.
 </p>
 <p>
 If the parameter <code>tau</code> is non-zero, then the measured
-specific enthalpy <i>h<sub>out</sub></i> that is used to 
-compute the enthalpy flow rate 
-<i>H&#775; = m&#775; h<sub>out</sub></i> 
-is computed using a first order differential equation. 
+specific enthalpy <i>h<sub>out</sub></i> that is used to
+compute the enthalpy flow rate
+<i>H&#775; = m&#775; h<sub>out</sub></i>
+is computed using a first order differential equation.
 See <a href=\"modelica://Buildings.Fluid.Sensors.UsersGuide\">
 Buildings.Fluid.Sensors.UsersGuide</a> for an explanation.
 </p>
@@ -81,14 +79,26 @@ Buildings.Fluid.Sensors.LatentEnthalpyFlowRate</a>.
 revisions="<html>
 <ul>
 <li>
+January 26, 2016, by Michael Wetter:<br/>
+Made unit assignment of output signal final.
+</li>
+<li>
+January 18, 2016 by Filip Jorissen:<br/>
+Using parameter <code>tauInv</code>
+since this now exists in
+<a href=\"modelica://Buildings.Fluid.Sensors.BaseClasses.PartialDynamicFlowSensor\">Buildings.Fluid.Sensors.BaseClasses.PartialDynamicFlowSensor</a>.
+This is for
+<a href=\"https://github.com/iea-annex60/modelica-annex60/issues/372\">#372</a>.
+</li>
+<li>
 August 31, 2013, by Michael Wetter:<br/>
-Removed default value <code>tau=0</code> as the base class 
+Removed default value <code>tau=0</code> as the base class
 already sets <code>tau=1</code>.
 This change was made so that all sensors use the same default value.
 </li>
 <li>
 June 3, 2011 by Michael Wetter:<br/>
-Revised implementation to add dynamics in such a way that 
+Revised implementation to add dynamics in such a way that
 the time constant increases as the mass flow rate tends to zero.
 This can improve the numerics.
 </li>

@@ -6,25 +6,32 @@ model StaticFourPortHeatMassExchanger
    final computeFlowResistance1=(dp1_nominal > Modelica.Constants.eps),
    final computeFlowResistance2=(dp2_nominal > Modelica.Constants.eps));
 
+  constant Boolean prescribedHeatFlowRate1 = false
+    "Set to true if the heat flow rate into fluid 1 is not a function of the component temperature";
+  constant Boolean prescribedHeatFlowRate2 = false
+    "Set to true if the heat flow rate into fluid 2 is not a function of the component temperature";
+
   parameter Boolean homotopyInitialization = true "= true, use homotopy method"
     annotation(Evaluate=true, Dialog(tab="Advanced"));
 
   input Modelica.SIunits.HeatFlowRate Q1_flow
-    "Heat transfered into the medium 1";
+    "Heat transferred into the medium 1";
   input Medium1.MassFlowRate mWat1_flow
     "Moisture mass flow rate added to the medium 1";
   input Modelica.SIunits.HeatFlowRate Q2_flow
-    "Heat transfered into the medium 2";
+    "Heat transferred into the medium 2";
   input Medium2.MassFlowRate mWat2_flow
     "Moisture mass flow rate added to the medium 2";
   constant Boolean sensibleOnly1
     "Set to true if sensible exchange only for medium 1";
   constant Boolean sensibleOnly2
     "Set to true if sensible exchange only for medium 2";
+
 protected
   Buildings.Fluid.Interfaces.StaticTwoPortHeatMassExchanger bal1(
-    final sensibleOnly = sensibleOnly1,
     redeclare final package Medium=Medium1,
+    final sensibleOnly = sensibleOnly1,
+    final prescribedHeatFlowRate=prescribedHeatFlowRate1,
     final m_flow_nominal = m1_flow_nominal,
     final dp_nominal = dp1_nominal,
     final allowFlowReversal = allowFlowReversal1,
@@ -37,8 +44,9 @@ protected
     final mWat_flow = mWat1_flow)
     "Model for heat, mass, species, trace substance and pressure balance of stream 1";
   Buildings.Fluid.Interfaces.StaticTwoPortHeatMassExchanger bal2(
-    final sensibleOnly = sensibleOnly2,
     redeclare final package Medium=Medium2,
+    final sensibleOnly = sensibleOnly2,
+    final prescribedHeatFlowRate=prescribedHeatFlowRate2,
     final m_flow_nominal = m2_flow_nominal,
     final dp_nominal = dp2_nominal,
     final allowFlowReversal = allowFlowReversal2,
@@ -57,10 +65,6 @@ equation
   connect(bal2.port_b, port_b2);
   annotation (
     preferredView="info",
-    Diagram(coordinateSystem(
-        preserveAspectRatio=false,
-        extent={{-100,-100},{100,100}},
-        grid={1,1})),
     Documentation(info="<html>
 <p>
 This component transports two fluid streams between four ports, without
@@ -70,12 +74,12 @@ Buildings.Fluid.Interfaces.StaticTwoPortHeatMassExchanger</a>,
 but it has four ports instead of two.
 </p>
 <p>
-If <code>dp<i>N</i>_nominal &gt; Modelica.Constants.eps</code>, 
+If <code>dp<i>N</i>_nominal &gt; Modelica.Constants.eps</code>,
 where <code><i>N</i></code> denotes the fluid <i>1</i> or <i>2</i>,
 then the model computes
 pressure drop due to flow friction in the respective fluid stream.
 The pressure drop is defined by a quadratic function that goes through
-the point <code>(m<i>N</i>_flow_nominal, dp<i>N</i>_nominal)</code>. 
+the point <code>(m<i>N</i>_flow_nominal, dp<i>N</i>_nominal)</code>.
 At <code>|m<i>N</i>_flow| &lt; deltaM<i>N</i> * m<i>N</i>_flow_nominal</code>,
 the pressure drop vs. flow relation is linearized.
 If the parameter <code>linearizeFlowResistance<i>N</i></code> is set to true,
@@ -103,11 +107,18 @@ or instantiates this model sets <code>mWat<i>N</i>_flow = 0</code>.
 <p>
      Note that the model does not implement <code>0 = Q1_flow + Q2_flow</code> or
      <code>0 = mXi1_flow + mXi2_flow</code>. If there is no heat or mass transfer
-     with the environment, then a model that extends this model needs to provide these 
+     with the environment, then a model that extends this model needs to provide these
      equations.
 </p>
 </html>", revisions="<html>
 <ul>
+<li>
+January 22, 2016 by Michael Wetter:<br/>
+Removed assignment of <code>sensibleOnly</code> in <code>bal1</code> and <code>bal2</code>
+as this constant has been removed in
+<a href=\"modelica://Buildings.Fluid.Interfaces.StaticTwoPortHeatMassExchanger\">
+Buildings.Fluid.Interfaces.StaticTwoPortHeatMassExchanger</a>.
+</li>
 <li>
 November 13, 2013 by Michael Wetter:<br/>
 Added parameter <code>homotopyInitialization</code> as
@@ -142,9 +153,9 @@ Added <code>homotopy</code> operator.
 <li>
 August 19, 2010, by Michael Wetter:<br/>
 Fixed bug in energy and moisture balance that affected results if a component
-adds or removes moisture to the air stream. 
+adds or removes moisture to the air stream.
 In the old implementation, the enthalpy and species
-outflow at <code>port_b</code> was multiplied with the mass flow rate at 
+outflow at <code>port_b</code> was multiplied with the mass flow rate at
 <code>port_a</code>. The old implementation led to small errors that were proportional
 to the amount of moisture change. For example, if the moisture added by the component
 was <code>0.005 kg/kg</code>, then the error was <code>0.5%</code>.
@@ -154,7 +165,7 @@ With the new implementation, the energy and moisture balance is exact.
 <li>
 March 22, 2010, by Michael Wetter:<br/>
 Added constants <code>sensibleOnly1</code> and
-<code>sensibleOnly2</code> to 
+<code>sensibleOnly2</code> to
 simplify species balance equations.
 </li>
 <li>

@@ -55,15 +55,13 @@ equation
   hMed_out = (1-XiActual[i_x]) * Medium.enthalpyOfNonCondensingGas(
       T=Medium.temperature(state=Medium.setState_phX(p=port_a.p, h=hActual, X=XiActual)));
   if dynamic then
-    der(h_out) = (hMed_out-h_out)*k/tau;
+    der(h_out) = (hMed_out-h_out)*k*tauInv;
   else
     h_out = hMed_out;
   end if;
   // Sensor output signal
   H_flow = port_a.m_flow * h_out;
 annotation (defaultComponentName="senEntFlo",
-  Diagram(coordinateSystem(preserveAspectRatio=true,  extent={{-100,-100},{100,
-            100}})),
   Icon(graphics={
         Ellipse(
           extent={{-70,70},{70,-70}},
@@ -82,17 +80,17 @@ annotation (defaultComponentName="senEntFlo",
           lineColor={0,0,0},
           fillColor={0,0,0},
           fillPattern=FillPattern.Solid),
-        Line(points={{0,0},{9.02,28.6}}, color={0,0,0}),
+        Line(points={{0,0},{9.02,28.6}}),
         Ellipse(
           extent={{-5,5},{5,-5}},
           lineColor={0,0,0},
           fillColor={0,0,0},
           fillPattern=FillPattern.Solid),
-        Line(points={{37.6,13.7},{65.8,23.9}}, color={0,0,0}),
-        Line(points={{22.9,32.8},{40.2,57.3}}, color={0,0,0}),
-        Line(points={{0,70},{0,40}}, color={0,0,0}),
-        Line(points={{-22.9,32.8},{-40.2,57.3}}, color={0,0,0}),
-        Line(points={{-37.6,13.7},{-65.8,23.9}}, color={0,0,0})}),
+        Line(points={{37.6,13.7},{65.8,23.9}}),
+        Line(points={{22.9,32.8},{40.2,57.3}}),
+        Line(points={{0,70},{0,40}}),
+        Line(points={{-22.9,32.8},{-40.2,57.3}}),
+        Line(points={{-37.6,13.7},{-65.8,23.9}})}),
   Documentation(info="<html>
 <p>
 This model outputs the <i>sensible</i> enthalphy flow rate of the medium in the flow
@@ -102,27 +100,27 @@ between its fluid ports. In particular, if the total enthalpy flow rate is
   H&#775;<sub>tot</sub> = H&#775;<sub>sen</sub> + H&#775;<sub>lat</sub>,
 </p>
 <p>
-where 
-<i>H&#775;<sub>sen</sub> = m&#775; (1-X<sub>w</sub>) c<sub>p,air</sub></i>, 
-then this sensor outputs <i>H&#775; = H&#775;<sub>sen</sub></i>. 
+where
+<i>H&#775;<sub>sen</sub> = m&#775; (1-X<sub>w</sub>) c<sub>p,air</sub></i>,
+then this sensor outputs <i>H&#775; = H&#775;<sub>sen</sub></i>.
 </p>
 
 <p>
 If the parameter <code>tau</code> is non-zero, then the measured
-specific sensible enthalpy <i>h<sub>out</sub></i> that is used to 
-compute the sensible enthalpy flow rate 
-<i>H&#775;<sub>sen</sub> = m&#775; h<sub>out</sub></i> 
-is computed using a first order differential equation. 
+specific sensible enthalpy <i>h<sub>out</sub></i> that is used to
+compute the sensible enthalpy flow rate
+<i>H&#775;<sub>sen</sub> = m&#775; h<sub>out</sub></i>
+is computed using a first order differential equation.
 See <a href=\"modelica://Buildings.Fluid.Sensors.UsersGuide\">
 Buildings.Fluid.Sensors.UsersGuide</a> for an explanation.
 </p>
 
 <p>
-For a sensor that measures 
+For a sensor that measures
 <i>H&#775;<sub>tot</sub></i>, use
 <a href=\"modelica://Buildings.Fluid.Sensors.EnthalpyFlowRate\">
 Buildings.Fluid.Sensors.EnthalpyFlowRate</a>.<br/>
-For a sensor that measures 
+For a sensor that measures
 <i>H&#775;<sub>lat</sub></i>, use
 <a href=\"modelica://Buildings.Fluid.Sensors.LatentEnthalpyFlowRate\">
 Buildings.Fluid.Sensors.LatentEnthalpyFlowRate</a>.
@@ -137,6 +135,14 @@ The sensor can only be used with medium models that implement the function
 revisions="<html>
 <ul>
 <li>
+January 18, 2016 by Filip Jorissen:<br/>
+Using parameter <code>tauInv</code> 
+since this now exists in
+<a href=\"modelica://Buildings.Fluid.Sensors.BaseClasses.PartialDynamicFlowSensor\">Buildings.Fluid.Sensors.BaseClasses.PartialDynamicFlowSensor</a>.
+This is for
+<a href=\"https://github.com/iea-annex60/modelica-annex60/issues/372\">#372</a>.
+</li>
+<li>
 September 10, 2013, by Michael Wetter:<br/>
 Changed medium declaration in the <code>extends</code> statement
 to <code>replaceable</code> to avoid a translation error in
@@ -144,7 +150,7 @@ OpenModelica.
 </li>
 <li>
 August 31, 2013, by Michael Wetter:<br/>
-Removed default value <code>tau=0</code> as the base class 
+Removed default value <code>tau=0</code> as the base class
 already sets <code>tau=1</code>.
 This change was made so that all sensors use the same default value.
 </li>
@@ -158,7 +164,7 @@ by the user.
 </li>
 <li>
 November 3, 2011, by Michael Wetter:<br/>
-Moved <code>der(h_out) := 0;</code> from the initial algorithm section to 
+Moved <code>der(h_out) := 0;</code> from the initial algorithm section to
 the initial equation section
 as this assignment does not conform to the Modelica specification.
 </li>
@@ -170,7 +176,7 @@ cannot differentiate the model when reducing the index of the DAE.
 </li>
 <li>
 June 3, 2011 by Michael Wetter:<br/>
-Revised implementation to add dynamics in such a way that 
+Revised implementation to add dynamics in such a way that
 the time constant increases as the mass flow rate tends to zero.
 This can improve the numerics.
 </li>

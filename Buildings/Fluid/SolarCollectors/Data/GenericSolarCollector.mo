@@ -7,7 +7,7 @@ record GenericSolarCollector
   parameter Modelica.SIunits.Area A "Area";
   parameter Modelica.SIunits.Mass mDry "Dry weight";
   parameter Modelica.SIunits.Volume V "Fluid volume";
-  parameter Modelica.SIunits.Pressure dp_nominal
+  parameter Modelica.SIunits.PressureDifference dp_nominal(displayUnit="Pa")
     "Pressure drop during test conditions";
   parameter Real mperA_flow_nominal(unit="kg/(s.m2)")
     "Mass flow rate per unit area of collector";
@@ -23,11 +23,14 @@ record GenericSolarCollector
     "Nominal solar irradiance specified in ratings data";
    parameter Modelica.SIunits.TemperatureDifference dT_nominal
     "Nominal temperature difference specified in ratings data";
-annotation(Documentation(info="<html>
+annotation(
+defaultComponentPrefixes="parameter",
+defaultComponentName="datSolCol",
+Documentation(info="<html>
   <p>
-    Generic data file which is used for the 
+    Generic data file which is used for the
     <a href=\"modelica://Buildings.Fluid.SolarCollectors.BaseClasses.PartialSolarCollector\">
-    Buildings.Fluid.Solarcollectors.BaseClasses.PartialSolarCollector</a> model. Establishes
+    Buildings.Fluid.Solarcollectors.BaseClasses.PartialSolarCollector</a> model. It establishes
     the base inputs needed to create model-specific data packages.
   </p>
 </html>"));

@@ -35,56 +35,45 @@ equation
 
   connect(TSet.y, con.u_s) annotation (Line(
       points={{-59,30},{-42,30}},
-      color={0,0,127},
-      smooth=Smooth.None));
+      color={0,0,127}));
   connect(TBC.port, theCon.port_a) annotation (Line(
       points={{20,70},{38,70}},
-      color={191,0,0},
-      smooth=Smooth.None));
+      color={191,0,0}));
   connect(theCon.port_b, cap.port) annotation (Line(
       points={{58,70},{66,70},{66,30},{48,30}},
-      color={191,0,0},
-      smooth=Smooth.None));
+      color={191,0,0}));
   connect(con.y, gain.u) annotation (Line(
       points={{-19,30},{-14,30}},
-      color={0,0,127},
-      smooth=Smooth.None));
+      color={0,0,127}));
   connect(cap.port, temSen.port) annotation (Line(
       points={{48,30},{70,30}},
-      color={191,0,0},
-      smooth=Smooth.None));
+      color={191,0,0}));
   connect(temSen.T, con.u_m) annotation (Line(
       points={{90,30},{94,30},{94,6},{-30,6},{-30,18}},
-      color={0,0,127},
-      smooth=Smooth.None));
+      color={0,0,127}));
   connect(gain.y, Q_flow.Q_flow) annotation (Line(
       points={{9,30},{16,30}},
-      color={0,0,127},
-      smooth=Smooth.None));
+      color={0,0,127}));
   connect(Q_flow.port, cap.port) annotation (Line(
       points={{36,30},{48,30}},
-      color={191,0,0},
-      smooth=Smooth.None));
+      color={191,0,0}));
   connect(sine.y, TBC.T) annotation (Line(
       points={{-59,70},{-2,70}},
-      color={0,0,127},
-      smooth=Smooth.None));
- annotation (Diagram(coordinateSystem(preserveAspectRatio=true,
-             extent={{-100,-100},{100,100}})),
-                      __Dymola_Commands(file="modelica://Buildings/Resources/Scripts/Dymola/Controls/Continuous/Examples/PIDHysteresis.mos"
+      color={0,0,127}));
+ annotation (                      __Dymola_Commands(file="modelica://Buildings/Resources/Scripts/Dymola/Controls/Continuous/Examples/PIDHysteresis.mos"
         "Simulate and plot"),
     experiment(StopTime=86400),
     Documentation(info="<html>
 <p>
 Example that demonstrates the use of the PID controller
-with hysteresis. The control objective is to keep 
+with hysteresis. The control objective is to keep
 the temperature of the energy storage <code>cap</code>
 at <i>40</i>&deg;C.
-The controller <code>con</code> is parameterized to 
-switch on if the control error is bigger than 
+The controller <code>con</code> is parameterized to
+switch on if the control error is bigger than
 <i>e<sub>on</sub>=1</i>.
 The output of the controller remains above <i>y<sub>min</sub>=0.3</i> until the control
-error is smaller than <i>e<sub>off</sub>=-1</i>, at which 
+error is smaller than <i>e<sub>off</sub>=-1</i>, at which
 time the controller outputs <i>y=0</i> until the
 control error is again bigger than <i>1</i>.
 The figure below shows the control error

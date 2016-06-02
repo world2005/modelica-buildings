@@ -1,5 +1,6 @@
 within Buildings.Examples.ChillerPlant.BaseClasses;
 model SimplifiedRoom "Simplified data center room"
+  extends Buildings.BaseClasses.BaseIconLow;
   replaceable package Medium = Modelica.Media.Interfaces.PartialMedium
     "Medium model";
   parameter Integer nPorts=0 "Number of parts" annotation (Evaluate=true,
@@ -14,13 +15,14 @@ model SimplifiedRoom "Simplified data center room"
     "Heat generation of the computer room";
 
   Buildings.Fluid.MixingVolumes.MixingVolume rooVol(
-    nPorts=nPorts,
     redeclare each package Medium = Medium,
+    nPorts=nPorts,
     V=rooLen*rooWid*rooHei,
     m_flow_nominal=m_flow_nominal,
     energyDynamics=Modelica.Fluid.Types.Dynamics.FixedInitial,
-    final T_start=293.15) "Volume of air in the room" annotation (Placement(
-        transformation(extent={{41,-20},{61,-40}}, rotation=0)));
+    final T_start=293.15,
+    final prescribedHeatFlowRate=true) "Volume of air in the room" annotation (Placement(
+        transformation(extent={{41,-20},{61,-40}})));
   Modelica.Fluid.Vessels.BaseClasses.VesselFluidPorts_b airPorts[nPorts](
       redeclare each package Medium = Medium) "Fluid inlets and outlets"
     annotation (Placement(transformation(
@@ -43,7 +45,7 @@ model SimplifiedRoom "Simplified data center room"
     "Nominal mass flow rate";
 equation
   connect(rooVol.ports, airPorts) annotation (Line(
-      points={{51,-20},{92,-20},{92,10},{101,10}},
+      points={{51,-20},{52,-20},{52,10},{52,10},{52,10},{101,10}},
       color={0,127,255},
       smooth=Smooth.None));
   connect(QSou.port, rooVol.heatPort) annotation (Line(
@@ -55,26 +57,25 @@ equation
       color={0,0,127},
       smooth=Smooth.None));
   annotation (
-    Diagram(coordinateSystem(preserveAspectRatio=true, extent={{-100,-100},{100,
-            100}})),
     Icon(coordinateSystem(preserveAspectRatio=true, extent={{-100,-100},{100,
             100}}), graphics={Rectangle(
           extent={{-100,100},{100,-100}},
           lineColor={0,0,0},
           fillColor={215,215,215},
           fillPattern=FillPattern.Solid,
-          lineThickness=1), Text(
-          extent={{-30,24},{40,-8}},
-          lineColor={0,0,0},
-          lineThickness=1,
-          fillColor={215,215,215},
-          fillPattern=FillPattern.Solid,
-          textString="name")}),
+          lineThickness=1)}),
     Documentation(info="<html>
 <p>
 This is a simplified room model for a data center. There is no heat exchange between the room and ambient environment through the building envelope since it is negligible compared to the heat released by the servers.
 </p></html>", revisions="<html>
 <ul>
+<li>
+July 17, 2015, by Michael Wetter:<br/>
+Added <code>prescribedHeatFlowRate=false</code> for both volumes.
+This is for 
+<a href=\"https://github.com/iea-annex60/modelica-annex60/issues/282\">
+issue 282</a> of the Annex 60 library.
+</li>
 <li>
 July 21, 2011 by Wangda Zuo:<br/>
 Merge to library.

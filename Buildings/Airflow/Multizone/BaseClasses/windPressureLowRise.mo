@@ -7,11 +7,6 @@ function windPressureLowRise "Wind pressure coefficient for low-rise buildings"
   input Real G "Natural logarithm of side ratio";
   output Real Cp "Wind pressure coefficient";
 protected
-  Modelica.SIunits.Angle aR "alpha, restricted to 0...pi";
-  Modelica.SIunits.Angle incAng2 "0.5*wind incidence angle";
-  Real sinA2 "=sin(alpha/2)";
-  Real cosA2 "=cos(alpha/2)";
-  Real a "Attenuation factor";
   constant Modelica.SIunits.Angle pi2 = 2*Modelica.Constants.pi;
   constant Modelica.SIunits.Angle aRDel = 5*Modelica.Constants.pi/180
     "Lower bound where transition occurs";
@@ -19,9 +14,15 @@ protected
     "Half-width of transition interval";
   constant Modelica.SIunits.Angle aRMax = 175*Modelica.Constants.pi/180
     "Upper bound where transition occurs";
-  constant Real a180 = Modelica.Math.log(1.248 - 0.703 +
-      0.131*Modelica.Math.sin(2*Modelica.Constants.pi*G)^3
-      + 0.071*G^2) "Attenuation factor at 180 degree incidence angle";
+  Real a180 = Modelica.Math.log(1.248 - 0.703 +
+              0.131*Modelica.Math.sin(2*Modelica.Constants.pi*G)^3
+              + 0.071*G^2) "Attenuation factor at 180 degree incidence angle";
+
+  Modelica.SIunits.Angle aR "alpha, restricted to 0...pi";
+  Modelica.SIunits.Angle incAng2 "0.5*wind incidence angle";
+  Real sinA2 "=sin(alpha/2)";
+  Real cosA2 "=cos(alpha/2)";
+  Real a "Attenuation factor";
 algorithm
   // Restrict incAng to [0...pi]
 
@@ -43,19 +44,21 @@ algorithm
   // Implementation of the wind pressure coefficient that is once
   // continuously differentiable for all incidence angles
   if aR < aRDel then
-    Cp :=Cp0*Buildings.Utilities.Math.Functions.spliceFunction(
-        pos=  Modelica.Math.log(1.248 - 0.703*sinA2 - 1.175*Modelica.Math.sin(aR)^2 +
-        0.131*Modelica.Math.sin(2*aR*G)^3 + 0.769*cosA2 + 0.071*G^2*sinA2^2 + 0.717*cosA2^2),
-        neg=1,
-        x=aR-aRDel2,
-        deltax=aRDel2);
+    Cp :=Cp0*Buildings.Utilities.Math.Functions.regStep(
+      y1=Modelica.Math.log(1.248 - 0.703*sinA2 - 1.175*Modelica.Math.sin(aR)^2
+         + 0.131*Modelica.Math.sin(2*aR*G)^3 + 0.769*cosA2 + 0.071*G^2*sinA2^2
+         + 0.717*cosA2^2),
+      y2=1,
+      x=aR - aRDel2,
+      x_small=aRDel2);
   elseif aR > aRMax then
-    Cp := Cp0*Buildings.Utilities.Math.Functions.spliceFunction(
-        pos=  a180,
-        neg=Modelica.Math.log(1.248 - 0.703*sinA2 - 1.175*Modelica.Math.sin(aR)^2 +
-        0.131*Modelica.Math.sin(2*aR*G)^3 + 0.769*cosA2 + 0.071*G^2*sinA2^2 + 0.717*cosA2^2),
-        x=aR+aRDel2-Modelica.Constants.pi,
-        deltax=aRDel2);
+    Cp :=Cp0*Buildings.Utilities.Math.Functions.regStep(
+      y1=a180,
+      y2=Modelica.Math.log(1.248 - 0.703*sinA2 - 1.175*Modelica.Math.sin(aR)^2
+         + 0.131*Modelica.Math.sin(2*aR*G)^3 + 0.769*cosA2 + 0.071*G^2*sinA2^2
+         + 0.717*cosA2^2),
+      x=aR + aRDel2 - Modelica.Constants.pi,
+      x_small=aRDel2);
   else
     Cp :=Cp0*Modelica.Math.log(1.248 - 0.703*sinA2 - 1.175*Modelica.Math.sin(aR)^2 +
       0.131*Modelica.Math.sin(2*aR*G)^3 + 0.769*cosA2 + 0.071*G^2*sinA2^2 + 0.717*cosA2^2);
@@ -71,14 +74,14 @@ who fitted a function to various wind pressure coefficients from the literature.
 The same correlation is also implemented in CONTAM (Persily and Ivy, 2001).
 </p>
 <p>
-The wind pressure coefficient is computed based on the 
+The wind pressure coefficient is computed based on the
 natural logarithm of the side ratio of the walls, which is defined as
 </p>
 <p align=\"center\" style=\"font-style:italic;\">
 G = ln(x &frasl; y)
 </p>
 <p>
-where <i>x</i> is the length of the wall that will be connected to 
+where <i>x</i> is the length of the wall that will be connected to
 this model, and <i>y</i> is the length of the adjacent wall as shown
 in the figure below.
 </p>
@@ -90,10 +93,10 @@ Based on the wind incidence angle <i>&alpha;</i> and the side ratio
 of the walls, the model computes how much the wind pressure
 is attenuated compared to the reference wind pressure <code>Cp0</code>.
 The reference wind pressure <code>Cp0</code> is a user-defined parameter,
-and must be equal to the wind pressure at zero wind incidence angle, i.e., 
+and must be equal to the wind pressure at zero wind incidence angle, i.e.,
 <i>&alpha; = 0</i>.
 Swami and Chandra (1987) recommend <i>C<sub>p0</sub> = 0.6</i> for
-all low-rise buildings as this represents the average of 
+all low-rise buildings as this represents the average of
 various values reported in the literature.
 The attenuation factor is
 </p>
@@ -106,7 +109,7 @@ C<sub>p</sub> &frasl; C<sub>p0</sub> = ln(1.248 - 0.703 sin(&alpha; &frasl; 2)
        + 0.717 cos<sup>2</sup>(&alpha; &frasl; 2)),
 </p>
 <p>
-where 
+where
 <i>C<sub>p</sub></i> is the wind pressure coefficient for
 the current angle of incidence.
 </p>
@@ -152,6 +155,17 @@ which generally leads to better numeric performance.
 </p>
 </html>", revisions="<html>
 <ul>
+<li>
+March 15, 2016, by Michael Wetter:<br/>
+Replaced <code>spliceFunction</code> with <code>regStep</code>.
+This is for
+<a href=\"https://github.com/iea-annex60/modelica-annex60/issues/300\">issue 300</a>.
+</li>
+<li>
+January 26, 2016, by Michael Wetter:<br/>
+Removed <code>constant</code> keyword for <code>a180</code> as its value
+depends on the input of the function.
+</li>
 <li>
 October 27, 2011 by Michael Wetter:<br/>
 First implementation.

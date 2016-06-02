@@ -4,10 +4,10 @@ model SolarRadiationExchange
   extends Buildings.Rooms.BaseClasses.PartialSurfaceInterfaceRadiative(
   final epsConExt = datConExt.layers.absSol_b,
   final epsConExtWinOpa = datConExtWin.layers.absSol_b,
-  final epsConExtWinUns={(1-datConExtWin[i].glaSys.glass[datConExtWin[i].glaSys.nLay].tauSol
-                     -datConExtWin[i].glaSys.glass[datConExtWin[i].glaSys.nLay].rhoSol_b) for i in 1:NConExtWin},
-  final epsConExtWinSha = {(1-datConExtWin[i].glaSys.glass[datConExtWin[i].glaSys.nLay].tauSol
-                       -datConExtWin[i].glaSys.glass[datConExtWin[i].glaSys.nLay].rhoSol_b) for i in 1:NConExtWin},
+  final epsConExtWinUns={(1-datConExtWin[i].glaSys.glass[size(datConExtWin[i].glaSys.glass, 1)].tauSol[1]
+                     -datConExtWin[i].glaSys.glass[size(datConExtWin[i].glaSys.glass, 1)].rhoSol_b[1]) for i in 1:NConExtWin},
+  final epsConExtWinSha = {(1-datConExtWin[i].glaSys.glass[size(datConExtWin[i].glaSys.glass, 1)].tauSol[1]
+                       -datConExtWin[i].glaSys.glass[size(datConExtWin[i].glaSys.glass, 1)].rhoSol_b[1]) for i in 1:NConExtWin},
   final epsConExtWinFra = datConExtWin.glaSys.absSolFra,
   final epsConPar_a = datConPar.layers.absSol_a,
   final epsConPar_b = datConPar.layers.absSol_b,
@@ -117,6 +117,12 @@ initial equation
   for i in 1:NConExtWin loop
     // We simplify and assume that the shaded and unshaded part of the window
     // have the same solar absorbtance.
+    // A further simplification is that the window is assumed to have the
+    // optical properties of state 1, which for electrochromic windows is
+    // the uncontrolled state. The error should be small as in the controlled state,
+    // there is little solar radiation entering the room, and with this simplification,
+    // the main error is that the radiation that is reflected in the room and hits the
+    // window is larger than it otherwise would be.
     // This simplification allows lumping the solar distribution into
     // a parameter.
     eps[i+NConExt+2*NConPar+NConBou+NSurBou+2*NConExtWin] = epsConExtWinUns[i];
@@ -274,14 +280,14 @@ Diagram(coordinateSystem(preserveAspectRatio=true, extent={{-240,-240},
 <p>
 This model computes the distribution of the solar radiation gain
 to the room surfaces.
-Let 
-<i>N<sup>w</sup></i> 
+Let
+<i>N<sup>w</sup></i>
 denote the number of windows,
-<i>N<sup>f</sup></i> 
+<i>N<sup>f</sup></i>
 the number of floor elements and
-<i>N<sup>n</sup></i> 
+<i>N<sup>n</sup></i>
 the number of non-floor elements such as ceiling, wall and window elements.
-Input to the model are the solar radiosities 
+Input to the model are the solar radiosities
 <i>J<sup>i</sup>, i &isin; {1, &hellip; , N<sup>w</sup>}</i>,
 that were transmitted through the window.
 The total incoming solar radiation is therefore
@@ -291,24 +297,24 @@ H = &sum;<sub>i=1</sub><sup>N<sup>w</sup></sup> J<sub>in</sub><sup>i</sup>
 </p>
 <p>
 It is assumed that <i>H</i> first hits the floor where some of it is absorbed,
-and some of it is diffusely reflected to all other surfaces. Only the first 
+and some of it is diffusely reflected to all other surfaces. Only the first
 reflection is taken into account and the location of the floor patch
 relative to the window is neglected.
 </p>
-<p>Hence, the radiation that is 
+<p>Hence, the radiation that is
 absorbed by each floor patch <i>i &isin; {1, &hellip;, N<sup>f</sup>}</i>,
 and may be partially transmitted in
 the unusual case that the floor contains a window, is
 </p>
 <p align=\"center\" style=\"font-style:italic;\">
- Q<sup>i</sup> = H &nbsp; (&epsilon;<sup>i</sup>+&tau;<sup>i</sup>) &nbsp; A<sup>i</sup> 
+ Q<sup>i</sup> = H &nbsp; (&epsilon;<sup>i</sup>+&tau;<sup>i</sup>) &nbsp; A<sup>i</sup>
 &frasl; &sum;<sub>j=1</sub><sup>N<sup>f</sup></sup> &nbsp; A<sup>j</sup>.
 </p>
 The sum of the radiation that is reflected by the floor is therefore
 <p align=\"center\" style=\"font-style:italic;\">
- J<sup>f</sup> = H &nbsp; 
+ J<sup>f</sup> = H &nbsp;
 &sum;<sub>i=1</sub><sup>N<sup>f</sup></sup>
-(1-&epsilon;<sup>i</sup>-&tau;<sup>i</sup>) &nbsp; A<sup>i</sup> 
+(1-&epsilon;<sup>i</sup>-&tau;<sup>i</sup>) &nbsp; A<sup>i</sup>
 &frasl; &sum;<sub>j=1</sub><sup>N<sup>f</sup></sup> &nbsp; A<sup>j</sup>.
 </p>
 <p>
@@ -323,17 +329,46 @@ A<sup>i</sup> &nbsp; (&epsilon;<sup>i</sup>+&tau;<sup>i</sup>)
 A<sup>k</sup> &nbsp; (&epsilon;<sup>k</sup>+&tau;<sup>k</sup>)
 </p>
 <p>
-For opaque surfaces, the heat flow rate 
-<i>Q<sup>i</sup></i> 
+For opaque surfaces, the heat flow rate
+<i>Q<sup>i</sup></i>
 is set to be equal to the heat flow rate at the heat port.
-For the glass of the windows, the heat flow rate 
+For the glass of the windows, the heat flow rate
 <i>Q<sup>i</sup></i> is set to the radiosity
 <i>J<sub>out</sub><sup>i</sup></i>
 that will strike the glass or the window shade as diffuse solar
 radiation.
+</p>
+<h4>Main assumptions</h4>
+<p>
+The main assumptions or simplifications are that the shaded and unshaded part of the window
+have the same solar absorbtance.
+Furthermore, if the room has electrochromic windows, the optical properties
+are taken from the state 1, which generally is
+the uncontrolled state. The error should be small as in the controlled state,
+there is little solar radiation entering the room, and with this simplification,
+the main error is that the radiation that is reflected in the room and hits the
+window is larger than it otherwise would be.
+This simplification allows lumping the solar distribution into
+a parameter.
+</p>
+<p>
+The model also assumes that all radiation first hits the floor from
+which it is diffusely distributed to the other surfaces.
+</p>
 </html>",
         revisions="<html>
 <ul>
+<li>
+August 7, 2015, by Michael Wetter:<br/>
+Revised model to allow modeling of electrochromic windows.
+This is for
+<a href=\"https://github.com/lbl-srg/modelica-buildings/issues/445\">issue 445</a>.
+</li>
+<li>
+March 13, 2015, by Michael Wetter:<br/>
+Changed model to avoid a translation error
+in OpenModelica.
+</li>
 <li>
 July 16, 2013, by Michael Wetter:<br/>
 Added assignment of heat port temperature instead of heat flow rate

@@ -1,13 +1,13 @@
 within Buildings.Fluid.Actuators.Dampers;
 model MixingBox "Outside air mixing box with interlocked air dampers"
   extends Buildings.Fluid.Actuators.BaseClasses.ActuatorSignal;
-  outer Modelica.Fluid.System system "System wide properties";
+
   replaceable package Medium =
       Modelica.Media.Interfaces.PartialMedium "Medium in the component"
     annotation (choicesAllMatching = true);
   import Modelica.Constants;
 
-  parameter Boolean allowFlowReversal = system.allowFlowReversal
+  parameter Boolean allowFlowReversal = true
     "= true to allow flow reversal, false restricts to design direction (port_a -> port_b)"
     annotation(Dialog(tab="Assumptions"), Evaluate=true);
 
@@ -33,8 +33,7 @@ model MixingBox "Outside air mixing box with interlocked air dampers"
     allowFlowReversal=allowFlowReversal,
     m_flow_nominal=mOut_flow_nominal,
     final filteredOpening=false)
-    annotation (Placement(transformation(extent={{-40,20},{-20,40}},   rotation=
-           0)));
+    annotation (Placement(transformation(extent={{-40,20},{-20,40}})));
   parameter Boolean use_deltaM = true
     "Set to true to use deltaM for turbulent transition, else ReC is used";
   parameter Real deltaM = 0.3
@@ -77,8 +76,7 @@ model MixingBox "Outside air mixing box with interlocked air dampers"
     use_constant_density=use_constant_density,
     allowFlowReversal=allowFlowReversal,
     final filteredOpening=false) "Exhaust air damper"
-    annotation (Placement(transformation(extent={{-20,-70},{-40,-50}}, rotation=
-           0)));
+    annotation (Placement(transformation(extent={{-20,-70},{-40,-50}})));
   parameter Modelica.SIunits.Area AExh=mExh_flow_nominal/rho_default/v_nominal
     "Face area exhaust air damper"
     annotation(Dialog(enable=not use_v_nominal));
@@ -119,21 +117,21 @@ model MixingBox "Outside air mixing box with interlocked air dampers"
   parameter Modelica.SIunits.MassFlowRate mOut_flow_nominal
     "Mass flow rate outside air damper"
     annotation (Dialog(group="Nominal condition"));
-  parameter Modelica.SIunits.Pressure dpOut_nominal(min=0, displayUnit="Pa")
+  parameter Modelica.SIunits.PressureDifference dpOut_nominal(min=0, displayUnit="Pa")
     "Pressure drop outside air leg"
      annotation (Dialog(group="Nominal condition"));
 
   parameter Modelica.SIunits.MassFlowRate mRec_flow_nominal
     "Mass flow rate recirculation air damper"
     annotation (Dialog(group="Nominal condition"));
-  parameter Modelica.SIunits.Pressure dpRec_nominal(min=0, displayUnit="Pa")
+  parameter Modelica.SIunits.PressureDifference dpRec_nominal(min=0, displayUnit="Pa")
     "Pressure drop recirculation air leg"
      annotation (Dialog(group="Nominal condition"));
 
   parameter Modelica.SIunits.MassFlowRate mExh_flow_nominal
     "Mass flow rate exhaust air damper"
     annotation (Dialog(group="Nominal condition"));
-  parameter Modelica.SIunits.Pressure dpExh_nominal(min=0, displayUnit="Pa")
+  parameter Modelica.SIunits.PressureDifference dpExh_nominal(min=0, displayUnit="Pa")
     "Pressure drop exhaust air leg"
      annotation (Dialog(group="Nominal condition"));
 
@@ -165,37 +163,35 @@ model MixingBox "Outside air mixing box with interlocked air dampers"
         Medium, m_flow(start=0, min=if allowFlowReversal then -Constants.inf else
                 0))
     "Fluid connector a (positive design flow direction is from port_a to port_b)"
-    annotation (Placement(transformation(extent={{-110,50},{-90,70}},
-          rotation=0)));
+    annotation (Placement(transformation(extent={{-110,50},{-90,70}})));
   Modelica.Fluid.Interfaces.FluidPort_b port_Exh(redeclare package Medium =
         Medium, m_flow(start=0, max=if allowFlowReversal then +Constants.inf else
                 0))
     "Fluid connector b (positive design flow direction is from port_a to port_b)"
-    annotation (Placement(transformation(extent={{-90,-70},{-110,-50}},
-          rotation=0)));
+    annotation (Placement(transformation(extent={{-90,-70},{-110,-50}})));
   Modelica.Fluid.Interfaces.FluidPort_a port_Ret(redeclare package Medium =
         Medium, m_flow(start=0, min=if allowFlowReversal then -Constants.inf else
                 0))
     "Fluid connector a (positive design flow direction is from port_a to port_b)"
-    annotation (Placement(transformation(extent={{110,-70},{90,-50}}, rotation=
-            0)));
+    annotation (Placement(transformation(extent={{110,-70},{90,-50}})));
   Modelica.Fluid.Interfaces.FluidPort_b port_Sup(redeclare package Medium =
         Medium, m_flow(start=0, max=if allowFlowReversal then +Constants.inf else
                 0))
     "Fluid connector b (positive design flow direction is from port_a to port_b)"
-    annotation (Placement(transformation(extent={{110,50},{90,70}}, rotation=0)));
+    annotation (Placement(transformation(extent={{110,50},{90,70}})));
   Modelica.Blocks.Sources.Constant uni(k=1) "Unity signal"
-    annotation (Placement(transformation(extent={{-90,-4},{-70,16}},rotation=0)));
+    annotation (Placement(transformation(extent={{-90,-4},{-70,16}})));
 
-  Modelica.Blocks.Math.Add add(k2=-1)
+  Modelica.Blocks.Math.Add add(k2=-1) "Adder"
                              annotation (Placement(transformation(extent={{-40,-10},
-            {-20,10}},    rotation=0)));
+            {-20,10}})));
 
 protected
   parameter Medium.Density rho_default=Medium.density(sta_default)
     "Density, used to compute fluid volume";
   parameter Medium.ThermodynamicState sta_default=
-     Medium.setState_pTX(T=Medium.T_default, p=Medium.p_default, X=Medium.X_default);
+     Medium.setState_pTX(T=Medium.T_default, p=Medium.p_default, X=Medium.X_default)
+    "Default medium state";
 equation
   connect(uni.y, add.u1) annotation (Line(points={{-69,6},{-42,6},{-42,6}},
         color={0,0,127}));
@@ -204,45 +200,33 @@ equation
                              color={0,0,127}));
   connect(damOA.port_a, port_Out) annotation (Line(
       points={{-40,30},{-70,30},{-70,60},{-100,60}},
-      color={0,127,255},
-      smooth=Smooth.None));
+      color={0,127,255}));
   connect(damExh.port_b, port_Exh) annotation (Line(
       points={{-40,-60},{-100,-60}},
-      color={0,127,255},
-      smooth=Smooth.None));
+      color={0,127,255}));
   connect(port_Sup, damOA.port_b) annotation (Line(
       points={{100,60},{80,60},{80,30},{-20,30}},
-      color={0,127,255},
-      smooth=Smooth.None));
+      color={0,127,255}));
   connect(damRec.port_b, port_Sup) annotation (Line(
       points={{30,10},{30,30},{80,30},{80,60},{100,60}},
-      color={0,127,255},
-      smooth=Smooth.None));
+      color={0,127,255}));
   connect(port_Ret, damExh.port_a) annotation (Line(
       points={{100,-60},{-20,-60}},
-      color={0,127,255},
-      smooth=Smooth.None));
+      color={0,127,255}));
   connect(port_Ret, damRec.port_a) annotation (Line(
       points={{100,-60},{30,-60},{30,-10}},
-      color={0,127,255},
-      smooth=Smooth.None));
+      color={0,127,255}));
   connect(y_actual, add.u2) annotation (Line(
       points={{50,70},{60,70},{60,60},{0,60},{0,-20},{-60,-20},{-60,-6},{-42,-6}},
-      color={0,0,127},
-      smooth=Smooth.None));
+      color={0,0,127}));
 
   connect(y_actual, damOA.y) annotation (Line(
       points={{50,70},{60,70},{60,60},{-30,60},{-30,42}},
-      color={0,0,127},
-      smooth=Smooth.None));
+      color={0,0,127}));
   connect(y_actual, damExh.y) annotation (Line(
       points={{50,70},{60,70},{60,60},{0,60},{0,-20},{-30,-20},{-30,-48}},
-      color={0,0,127},
-      smooth=Smooth.None));
-  annotation (Diagram(coordinateSystem(preserveAspectRatio=true,  extent={{-100,
-            -100},{100,100}}),
-                      graphics),
-                       Icon(coordinateSystem(preserveAspectRatio=true,  extent={{-100,
+      color={0,0,127}));
+  annotation (                       Icon(coordinateSystem(preserveAspectRatio=true,  extent={{-100,
             -100},{100,100}}), graphics={
         Rectangle(
           extent={{-94,12},{90,0}},
@@ -312,8 +296,7 @@ equation
           fillPattern=FillPattern.Solid),
         Line(
           points={{0,40},{0,10},{0,12}},
-          color={0,0,255},
-          smooth=Smooth.None),
+          color={0,0,255}),
                              Text(
           extent={{-50,-84},{48,-132}},
           lineColor={0,0,255},
@@ -322,6 +305,12 @@ equation
 defaultComponentName="eco",
 Documentation(revisions="<html>
 <ul>
+<li>
+January 22, 2016, by Michael Wetter:<br/>
+Corrected type declaration of pressure difference.
+This is
+for <a href=\"https://github.com/iea-annex60/modelica-annex60/issues/404\">#404</a>.
+</li>
 <li>
 December 14, 2012 by Michael Wetter:<br/>
 Renamed protected parameters for consistency with the naming conventions.

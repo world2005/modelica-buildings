@@ -39,9 +39,9 @@ Documentation(info="<html>
 <p>
 This function computes the derivative of the opening characteristics of an equal percentage valve.
 </p><p>
-The function is the derivative of  
+The function is the derivative of
 <a href=\"modelica://Buildings.Fluid.Actuators.BaseClasses.equalPercentage\">
-TwoWayValveEqualPercentage</a>.
+Buildings.Fluid.Actuators.BaseClasses.equalPercentage</a>.
 </p>
 </html>",
 revisions="<html>
